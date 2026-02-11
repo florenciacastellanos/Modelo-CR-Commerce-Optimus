@@ -1,0 +1,5 @@
+-- Explorar estructura de tabla BT_CX_STUDIO_SAMPLE
+SELECT *
+FROM `meli-bi-data.WHOWNER.BT_CX_STUDIO_SAMPLE`
+WHERE CAS_CASE_ID IS NOT NULL
+LIMIT 1

@@ -1,0 +1,63 @@
+-- ══════════════════════════════════════════════════════════════════════════════
+-- MUESTREO Defectuoso - Flex DICIEMBRE 2025
+-- PONDERADO 70/30 (pico 29-30 dic)
+-- ══════════════════════════════════════════════════════════════════════════════
+
+WITH STUDIO_SUMMARIES AS (
+    SELECT
+        CAS_CASE_ID,
+        TRIM(REGEXP_REPLACE(
+            CONCAT(
+                COALESCE(JSON_VALUE(SUMMARY_CX_STUDIO, '$.problem'), ''),
+                ' ',
+                COALESCE(JSON_VALUE(SUMMARY_CX_STUDIO, '$.solution'), '')
+            ),
+            r'\\s+', ' '
+        )) AS CONVERSATION_SUMMARY
+    FROM `meli-bi-data.WHOWNER.BT_CX_STUDIO_SAMPLE`
+    WHERE ARRIVAL_DATE BETWEEN '2025-11-15' AND '2026-01-15'
+),
+INCOMING_BASE AS (
+    SELECT
+        INC.CAS_CASE_ID,
+        INC.PROCESS_NAME,
+        DATE(INC.CONTACT_DATE_ID) as FECHA_CONTACTO,
+        CASE 
+            WHEN INC.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PDD%') THEN 'PDD'  
+            WHEN INC.PROCESS_PROBLEMATIC_REPORTING = 'Conflict Others' THEN 'PDD'
+            ELSE 'OTRO' 
+        END AS AGRUP_COMMERCE
+    FROM `meli-bi-data.WHOWNER.BT_CX_CONTACTS` INC
+    WHERE INC.SIT_SITE_ID = 'MLA'
+        AND DATE_TRUNC(INC.CONTACT_DATE_ID, MONTH) = '2025-12-01'
+        AND INC.PROCESS_BU_CR_REPORTING IN ('ME','ML')
+        AND COALESCE(INC.FLAG_EXCLUDE_NUMERATOR_CR, 0) = 0
+        AND INC.PROCESS_NAME = 'Defectuoso - Flex'
+),
+JOINED AS (
+    SELECT 
+        INC.CAS_CASE_ID,
+        INC.PROCESS_NAME,
+        INC.FECHA_CONTACTO,
+        ST.CONVERSATION_SUMMARY
+    FROM INCOMING_BASE INC
+    INNER JOIN STUDIO_SUMMARIES ST ON INC.CAS_CASE_ID = ST.CAS_CASE_ID
+    WHERE INC.AGRUP_COMMERCE = 'PDD'
+        AND ST.CONVERSATION_SUMMARY IS NOT NULL
+        AND LENGTH(ST.CONVERSATION_SUMMARY) > 20
+),
+MUESTRA_PICO AS (
+    SELECT * FROM JOINED
+    WHERE FECHA_CONTACTO IN ('2025-12-29', '2025-12-30')
+    ORDER BY RAND()
+    LIMIT 70
+),
+MUESTRA_RESTO AS (
+    SELECT * FROM JOINED
+    WHERE FECHA_CONTACTO NOT IN ('2025-12-29', '2025-12-30')
+    ORDER BY RAND()
+    LIMIT 30
+)
+SELECT * FROM MUESTRA_PICO
+UNION ALL
+SELECT * FROM MUESTRA_RESTO

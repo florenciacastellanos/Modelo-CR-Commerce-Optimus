@@ -1,0 +1,38 @@
+[MASTER]
+# Python version
+py-version=3.9
+
+# Files or directories to be skipped
+ignore=CVS,.git,__pycache__,venv,env,.venv,.env,test,tests
+
+[MESSAGES CONTROL]
+# Disable specific warnings
+disable=
+    C0111,  # missing-docstring
+    C0103,  # invalid-name
+    R0913,  # too-many-arguments
+    R0914,  # too-many-locals
+    W0212,  # protected-access
+    C0330,  # bad-continuation
+
+[FORMAT]
+# Maximum line length
+max-line-length=100
+
+# String quote preference
+string-quote=single
+
+[BASIC]
+# Good variable names
+good-names=i,j,k,df,cr,pp,id
+
+[DESIGN]
+# Maximum number of arguments
+max-args=7
+
+# Maximum number of locals
+max-locals=20
+
+[SIMILARITIES]
+# Minimum lines for duplicate code detection
+min-similarity-lines=10
