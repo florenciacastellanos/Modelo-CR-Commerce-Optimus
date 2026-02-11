@@ -1,0 +1,252 @@
+# ============================================
+# Contact Rate Analysis - .gitignore
+# ============================================
+
+# ===== Python =====
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ===== IDE / Editor =====
+# VSCode
+.vscode/
+*.code-workspace
+
+# Cursor
+.cursor/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ===== Operating System =====
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===== Project Specific =====
+# BigQuery credentials
+*.json
+!config/**/*.json
+!validations/**/*.json
+credentials/
+service-account-key.json
+keyfile.json
+
+# Test outputs (CSV y HTML)
+test/outputs/**/*.csv
+test/outputs/**/*.html
+*.csv
+*.html
+# EXCEPCIONES: Templates y documentación
+!templates/**/*.html
+!docs/**/*.html
+
+# Logs
+logs/
+*.log
+
+# Cache
+cache/
+.cache/
+*.cache
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Data files (excepto examples)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Reports (solo en test/outputs)
+reports/
+*.pdf
+
+# ===== Output Directory (NUEVO v3.9) =====
+# Output - Reportes generados temporalmente
+output/rca/**/*.html
+output/cr/**/*.html
+output/**/*.csv
+output/**/*.json
+# EXCEPCIÓN: Mantener ejemplos de referencia
+!output/examples/**
+!output/examples/*.html
+!output/**/README.md
+# Mantener estructura de carpetas
+!output/**/.gitkeep
+
+# ===== Mercado Libre Specific =====
+# Melitk credentials
+.melitk/
+melitk_credentials.json
+
+# Internal data
+internal/
+confidential/
+
+# ===== Security =====
+# Secrets
+secrets/
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+
+# API keys
+.env.local
+.env.*.local
+api_keys.txt
+
+# ===== Documentation Build =====
+# Sphinx
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# MkDocs
+site/
+
+# ===== Package Manager =====
+# npm
+node_modules/
+package-lock.json
+
+# Poetry
+poetry.lock
+
+# Pipenv
+Pipfile.lock
+
+# ===== Misc =====
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Large files
+*.parquet
+*.feather
+
+# Jupyter notebooks output (opcional - comentar si quieres versionarlo)
+# V37.ipynb
+
+# ===== Exceptions =====
+# Keep important config files
+!config/**/*.py
+!config/**/*.yaml
+!config/**/*.yml
+
+# Keep validation test cases
+!validations/test_cases.json
+
+# Keep example data
+!examples/**/*.csv
+
+# Keep README files everywhere
+!**/README.md
+
+# ============================================
+# End of .gitignore
+# ============================================
