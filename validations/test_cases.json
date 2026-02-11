@@ -1,0 +1,119 @@
+{
+  "test_cases": [
+    {
+      "id": "TC001",
+      "name": "PDD MLA PROCESS_NAME Nov-Dic 2025",
+      "commerce_group": "PDD",
+      "site": "MLA",
+      "dimension": "PROCESS_NAME",
+      "period1": "2025-11",
+      "period2": "2025-12",
+      "expected_total_period1": 99798,
+      "expected_total_period2": 112554,
+      "status": "PASSED",
+      "validation_date": "2026-01-20",
+      "notes": "100% match con Jupyter Lab"
+    },
+    {
+      "id": "TC002",
+      "name": "PDD MLA CDU Nov-Dic 2025",
+      "commerce_group": "PDD",
+      "site": "MLA",
+      "dimension": "CDU",
+      "period1": "2025-11",
+      "period2": "2025-12",
+      "status": "PASSED",
+      "validation_date": "2026-01-20",
+      "notes": "Funcionamiento perfecto"
+    },
+    {
+      "id": "TC003",
+      "name": "PDD MLA TIPIFICACION Nov-Dic 2025",
+      "commerce_group": "PDD",
+      "site": "MLA",
+      "dimension": "REASON_DETAIL_GROUP_REPORTING",
+      "period1": "2025-11",
+      "period2": "2025-12",
+      "status": "PASSED",
+      "validation_date": "2026-01-20",
+      "notes": "Validado correctamente"
+    },
+    {
+      "id": "TC004",
+      "name": "PNR MLB PROCESS_NAME Sep-Oct 2025",
+      "commerce_group": "PNR",
+      "site": "MLB",
+      "dimension": "PROCESS_NAME",
+      "period1": "2025-09",
+      "period2": "2025-10",
+      "status": "PASSED",
+      "validation_date": "2026-01-21",
+      "notes": "Sampling aplicado correctamente"
+    },
+    {
+      "id": "TC005",
+      "name": "ME Distribución MLA PROCESS_NAME Jul-Ago 2025",
+      "commerce_group": "ME Distribución",
+      "site": "MLA",
+      "dimension": "PROCESS_NAME",
+      "period1": "2025-07",
+      "period2": "2025-08",
+      "status": "PASSED",
+      "validation_date": "2026-01-21",
+      "notes": "Validado con threshold rule"
+    },
+    {
+      "id": "TC006",
+      "name": "Experiencia Impositiva MLA PROCESS_NAME Jul-Ago 2025",
+      "commerce_group": "Experiencia Impositiva",
+      "site": "MLA",
+      "dimension": "PROCESS_NAME",
+      "period1": "2025-07",
+      "period2": "2025-08",
+      "status": "PASSED",
+      "validation_date": "2026-01-22",
+      "notes": "Validado correctamente"
+    },
+    {
+      "id": "TC007",
+      "name": "Post Compra Posterior a la Entrega ME - Threshold Rule",
+      "commerce_group": "ME Distribución",
+      "site": "MLA",
+      "dimension": "CDU",
+      "period1": "2025-07",
+      "period2": "2025-08",
+      "threshold_rule": "SUM >= 50 in ANY period",
+      "status": "PASSED",
+      "validation_date": "2026-01-22",
+      "notes": "Regla de threshold validada: proceso visible cuando suma >= 50 en cualquier período"
+    }
+  ],
+  "validation_summary": {
+    "total_tests": 7,
+    "passed": 7,
+    "failed": 0,
+    "pass_rate": "100%",
+    "last_validation": "2026-01-22",
+    "validated_dimensions": [
+      "PROCESS_NAME",
+      "CDU",
+      "TIPIFICACION",
+      "CLA_REASON_DETAIL",
+      "ENVIRONMENT"
+    ],
+    "validated_commerce_groups": [
+      "PDD",
+      "PNR",
+      "ME Distribución",
+      "ME PreDespacho",
+      "FBM Sellers",
+      "Pre Venta",
+      "Post Venta",
+      "Generales Compra",
+      "Moderaciones",
+      "Pagos",
+      "Full Sellers",
+      "Experiencia Impositiva"
+    ]
+  }
+}

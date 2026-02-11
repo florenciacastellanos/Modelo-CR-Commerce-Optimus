@@ -1,0 +1,4121 @@
+{
+  "metadata": {
+    "last_updated": "2026-02-01T15:33:33.908904",
+    "source": "BT_CX_CONTACTS - últimos 3 meses",
+    "dimensions_available": [
+      "CDU",
+      "ENVIRONMENT",
+      "PROCESO",
+      "TIPIFICACION"
+    ],
+    "total_values": 568,
+    "generation_script": "scripts/actualizar_mapeo_dimensiones.py"
+  },
+  "mappings": {
+    "CDU": {
+      "MED PDD Devoluci¾n efectiva": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 260355,
+        "total_cases_3m": 779873
+      },
+      "Otros PNR": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 151486,
+        "total_cases_3m": 443201
+      },
+      "MED PDD Oportunidad C": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 106632,
+        "total_cases_3m": 319274
+      },
+      "Reclamos": {
+        "commerce_groups": [
+          "Post Venta",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 101845,
+        "total_cases_3m": 305206
+      },
+      "MED PDD Ambos": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 100031,
+        "total_cases_3m": 299761
+      },
+      "MED PDD Devoluci¾n no efectiva": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 86607,
+        "total_cases_3m": 259822
+      },
+      "Tiene dudas sobre el estado del envio": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 71787,
+        "total_cases_3m": 215361
+      },
+      "HT - Ventas": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 70921,
+        "total_cases_3m": 212360
+      },
+      "MED PDD Parcial": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 68788,
+        "total_cases_3m": 194584
+      },
+      "Mediaci¾n cerrada": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 40645,
+        "total_cases_3m": 121829
+      },
+      "MED PDD Oportunidad V": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 37367,
+        "total_cases_3m": 111754
+      },
+      "Devoluciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 35084,
+        "total_cases_3m": 105252
+      },
+      "MED PDD Nota Fiscal": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 33147,
+        "total_cases_3m": 99443
+      },
+      "Bugs": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Pre Venta",
+          "Experiencia Impositiva",
+          "Pagos",
+          "ME Drivers",
+          "Post Venta",
+          "FBM Sellers",
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 70422,
+        "total_cases_3m": 99412
+      },
+      "MED PDD Grandes Dimensiones": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 32343,
+        "total_cases_3m": 95976
+      },
+      "Mediaci¾n abierta": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 27414,
+        "total_cases_3m": 81841
+      },
+      "Generales": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Post Venta",
+          "FBM Sellers",
+          "Pre Venta",
+          "Pagos",
+          "Experiencia Impositiva",
+          "Moderaciones",
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 45409,
+        "total_cases_3m": 73892
+      },
+      "Reclamo abierto": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 24522,
+        "total_cases_3m": 73566
+      },
+      "MED PDD OPL Dudas": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 23270,
+        "total_cases_3m": 69662
+      },
+      "Iniciar reclamo en nombre del comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 21189,
+        "total_cases_3m": 63568
+      },
+      "PNR Extraviado": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 21734,
+        "total_cases_3m": 60082
+      },
+      "Fakes": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 20023,
+        "total_cases_3m": 59538
+      },
+      "Cancelaciones": {
+        "commerce_groups": [
+          "Post Venta",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 20171,
+        "total_cases_3m": 58785
+      },
+      "Reclama por el costo de envÝo": {
+        "commerce_groups": [
+          "Generales Compra",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 18501,
+        "total_cases_3m": 55304
+      },
+      "Pago devuelto ": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 17916,
+        "total_cases_3m": 53749
+      },
+      "Quiere cancelar o reprogramar el envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 17441,
+        "total_cases_3m": 52325
+      },
+      "MED PDD Apelaciones Buyer": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 16975,
+        "total_cases_3m": 50927
+      },
+      "Rollback": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 17668,
+        "total_cases_3m": 45679
+      },
+      "MED PDD Acompa±amos Segundo EnvÝo": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 15347,
+        "total_cases_3m": 45417
+      },
+      "MED PDD Low Cost": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 13217,
+        "total_cases_3m": 39653
+      },
+      "Problemas para despachar un paquete/producto": {
+        "commerce_groups": [
+          "Generales Compra",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 13262,
+        "total_cases_3m": 39493
+      },
+      "PNR C no recibe": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 13185,
+        "total_cases_3m": 38609
+      },
+      "Diferencia en IS": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 11712,
+        "total_cases_3m": 35136
+      },
+      "Quiere consultar por una devoluci¾n en camino": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 11291,
+        "total_cases_3m": 33874
+      },
+      "Descuentos Comprador": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Pagos"
+        ],
+        "avg_monthly_cases": 10741,
+        "total_cases_3m": 31220
+      },
+      "No puede iniciar reclamo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 10298,
+        "total_cases_3m": 30896
+      },
+      "Post Compra": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 8198,
+        "total_cases_3m": 24594
+      },
+      "MED Fuera de Compra Protegida": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 8178,
+        "total_cases_3m": 24534
+      },
+      "CBT - Demoras en el despacho": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 13492,
+        "total_cases_3m": 24086
+      },
+      "Tiene problemas con la etiqueta de su envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 7896,
+        "total_cases_3m": 23690
+      },
+      "MED PDD C riesgo Alto": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 7703,
+        "total_cases_3m": 23109
+      },
+      "C¾mo iniciar un reclamo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 7608,
+        "total_cases_3m": 22824
+      },
+      "[Proximity] Comprador tiene dudas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 6857,
+        "total_cases_3m": 20571
+      },
+      "Pago pendiente": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 6767,
+        "total_cases_3m": 20301
+      },
+      "Necesita que le liberen el dinero": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 6514,
+        "total_cases_3m": 19543
+      },
+      "HT - Colecta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 6481,
+        "total_cases_3m": 19443
+      },
+      "MED PDD Super CX": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 6412,
+        "total_cases_3m": 19103
+      },
+      "Tiene dudas generales sobre el despacho": {
+        "commerce_groups": [
+          "Generales Compra",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 6821,
+        "total_cases_3m": 17784
+      },
+      "Consultas informativas de Reputaci¾n": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 5896,
+        "total_cases_3m": 17689
+      },
+      "Modificar": {
+        "commerce_groups": [
+          "Pre Venta",
+          "PDD"
+        ],
+        "avg_monthly_cases": 5890,
+        "total_cases_3m": 17541
+      },
+      "CBT": {
+        "commerce_groups": [
+          "Post Venta",
+          "Pre Venta",
+          "Generales Compra",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 14307,
+        "total_cases_3m": 17171
+      },
+      "MÚtricas y comisiones": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 4870,
+        "total_cases_3m": 14612
+      },
+      "Costos de devoluci¾n": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 4580,
+        "total_cases_3m": 13742
+      },
+      "Quiere reclamar por un producto ya devuelto": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 4460,
+        "total_cases_3m": 13382
+      },
+      "Pago rechazado": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 4407,
+        "total_cases_3m": 13221
+      },
+      "Quiere saber porquÚ se inactiv¾ su cuenta": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 4390,
+        "total_cases_3m": 13171
+      },
+      "Re-Facturaci¾n 1P": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 4332,
+        "total_cases_3m": 12997
+      },
+      "Usuario Restringido": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 4136,
+        "total_cases_3m": 12410
+      },
+      "Administraci¾n de la suscripci¾n": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 4087,
+        "total_cases_3m": 12261
+      },
+      "Dudas sobre como comprar (usuario no sabe utilizar la plataforma para comprar) ": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 4049,
+        "total_cases_3m": 12149
+      },
+      "Anßlisis masivo de ventas": {
+        "commerce_groups": [
+          "Post Venta",
+          "Generales Compra",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 6838,
+        "total_cases_3m": 11958
+      },
+      "Cancelaciones - PCF": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 3865,
+        "total_cases_3m": 11597
+      },
+      "MED C Recibe / Acuerdo entre partes": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 5017,
+        "total_cases_3m": 11125
+      },
+      "Colecta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 3550,
+        "total_cases_3m": 10652
+      },
+      "[Proximity] Crear reclamo en nombre del C": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 3463,
+        "total_cases_3m": 10390
+      },
+      "Antes del reclamo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 3407,
+        "total_cases_3m": 10221
+      },
+      "Faturador MeLi": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 3399,
+        "total_cases_3m": 10198
+      },
+      "Dudas sobre cargos facturados": {
+        "commerce_groups": [
+          "Experiencia Impositiva",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 3433,
+        "total_cases_3m": 10181
+      },
+      "Quiere saber porque no le pagaron una ruta": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 3302,
+        "total_cases_3m": 9908
+      },
+      "TEST TIPIF AUTOM┴TICA": {
+        "commerce_groups": [
+          "Generales Compra",
+          "PDD",
+          "Pre Venta",
+          "FBM Sellers",
+          "Experiencia Impositiva",
+          "Pagos",
+          "ME Drivers",
+          "Post Venta",
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 7825,
+        "total_cases_3m": 9536
+      },
+      "PNR Fuera de CP": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 3189,
+        "total_cases_3m": 9429
+      },
+      "Pago aprobado": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 3128,
+        "total_cases_3m": 9386
+      },
+      "Temporal": {
+        "commerce_groups": [
+          "Post Venta",
+          "Generales Compra",
+          "FBM Sellers",
+          "Experiencia Impositiva",
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 4261,
+        "total_cases_3m": 8849
+      },
+      "Quiere reportar problemas con el transportista": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2906,
+        "total_cases_3m": 8720
+      },
+      "Facturas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2751,
+        "total_cases_3m": 8255
+      },
+      "MED PDD V riesgo Alto": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 2628,
+        "total_cases_3m": 7886
+      },
+      "Quiere actualizar el estado de su envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2623,
+        "total_cases_3m": 7871
+      },
+      "Cargos": {
+        "commerce_groups": [
+          "Pre Venta",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 2741,
+        "total_cases_3m": 7803
+      },
+      "Posicionamiento": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 2559,
+        "total_cases_3m": 7677
+      },
+      "PNR V no despacha/No envia comprobante": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 2714,
+        "total_cases_3m": 7609
+      },
+      "Onboarding Flex": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2462,
+        "total_cases_3m": 7387
+      },
+      "PNR Excepcion": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 2507,
+        "total_cases_3m": 7297
+      },
+      "Problemas Colecta": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 2316,
+        "total_cases_3m": 6950
+      },
+      "[Proximity] Comprador deja de responder - No se inicia reclamo ": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2293,
+        "total_cases_3m": 6880
+      },
+      "Gesti¾n LogÝstica": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2207,
+        "total_cases_3m": 6622
+      },
+      "Problemas con descuentos o promociones": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 2191,
+        "total_cases_3m": 6573
+      },
+      "Problemas con la suscripci¾n / beneficio": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2185,
+        "total_cases_3m": 6557
+      },
+      "Verdi MED": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2154,
+        "total_cases_3m": 6462
+      },
+      "PNR PDD en PNR": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 2137,
+        "total_cases_3m": 6411
+      },
+      "TBD": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Generales Compra",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 3408,
+        "total_cases_3m": 6385
+      },
+      "Dudas sobre la preparaci¾n": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 2115,
+        "total_cases_3m": 6345
+      },
+      "CBT - Demoras": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 2040,
+        "total_cases_3m": 6121
+      },
+      "Tiene problemas durante la creacion de la cuenta": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 2025,
+        "total_cases_3m": 6076
+      },
+      "Quiere saber como funciona EnvÝos Extra": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 1997,
+        "total_cases_3m": 5992
+      },
+      "TBD CBT IP": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 1997,
+        "total_cases_3m": 5992
+      },
+      "Dudas de su stock": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 1994,
+        "total_cases_3m": 5983
+      },
+      "HT - Informativas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1975,
+        "total_cases_3m": 5926
+      },
+      "PNR V Riesgo Alto": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 3252,
+        "total_cases_3m": 5875
+      },
+      "Informa una operaci¾n no localizada en su cadastro": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 1953,
+        "total_cases_3m": 5860
+      },
+      "PNR V Devuelve el pago": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 2012,
+        "total_cases_3m": 5836
+      },
+      "Dudas sobre documentos fiscales y reportes": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 1858,
+        "total_cases_3m": 5575
+      },
+      "Modificaci¾n de condici¾n fiscal": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 1858,
+        "total_cases_3m": 5574
+      },
+      "Mal categorizado": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 3556,
+        "total_cases_3m": 5562
+      },
+      "Costo de envÝo": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 1818,
+        "total_cases_3m": 5455
+      },
+      "Re-facturaci¾n": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 1762,
+        "total_cases_3m": 5287
+      },
+      "Otros PCF": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1729,
+        "total_cases_3m": 5188
+      },
+      "Publicidad": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1706,
+        "total_cases_3m": 5120
+      },
+      "Dudas sobre el envÝo": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 1696,
+        "total_cases_3m": 5088
+      },
+      "Quiere cambiar la direcci¾n o receptor del envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1639,
+        "total_cases_3m": 4917
+      },
+      "Pago cancelado": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 1613,
+        "total_cases_3m": 4841
+      },
+      "Places": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1607,
+        "total_cases_3m": 4822
+      },
+      "Tiene problemas al recibir/entregar paquetes": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1586,
+        "total_cases_3m": 4758
+      },
+      "Publicar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1582,
+        "total_cases_3m": 4748
+      },
+      "Activar/desactivar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1523,
+        "total_cases_3m": 4571
+      },
+      "[Proximity] C se contacta para cancelar ": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1507,
+        "total_cases_3m": 4521
+      },
+      "GestÒo de casos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1453,
+        "total_cases_3m": 4361
+      },
+      "MED PDD Bonus Track": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1395,
+        "total_cases_3m": 4185
+      },
+      "Por quÚ no veo mi pago acreditado?": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 1394,
+        "total_cases_3m": 4182
+      },
+      "Cambios": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1334,
+        "total_cases_3m": 4004
+      },
+      "Error en la mediaci¾n/Consultas ARC": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1321,
+        "total_cases_3m": 3965
+      },
+      "Reclamo cerrado": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1316,
+        "total_cases_3m": 3948
+      },
+      "[Proximity] disconformidad con monto devuelto": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1316,
+        "total_cases_3m": 3948
+      },
+      "Dudas sobre retenci¾n especifica aplicada": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 1250,
+        "total_cases_3m": 3752
+      },
+      "Verdi PNR C": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 1245,
+        "total_cases_3m": 3735
+      },
+      "Quiere saber porque no recibe rutas": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 1242,
+        "total_cases_3m": 3727
+      },
+      "Quiere gestionar una cuenta ya creada": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 1236,
+        "total_cases_3m": 3708
+      },
+      "Redes - Iniciales": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1224,
+        "total_cases_3m": 3672
+      },
+      "TO y Mi Pßgina": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1220,
+        "total_cases_3m": 3660
+      },
+      "Configuraci¾n y funcionalidades": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1214,
+        "total_cases_3m": 3644
+      },
+      "Quiere saber el motivo de inicio de la devoluci¾n": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1208,
+        "total_cases_3m": 3626
+      },
+      "Quiere cancelar - con ME": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 1207,
+        "total_cases_3m": 3623
+      },
+      "Antes de hacer un pago": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1196,
+        "total_cases_3m": 3590
+      },
+      "Consultas sobre la compra realizada": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1166,
+        "total_cases_3m": 3499
+      },
+      "MED PDD Verdi": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1150,
+        "total_cases_3m": 3451
+      },
+      "Denuncia de comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1140,
+        "total_cases_3m": 3421
+      },
+      "Promociones": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1133,
+        "total_cases_3m": 3400
+      },
+      "Agendamiento": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 1110,
+        "total_cases_3m": 3332
+      },
+      "CBT - Entrega no efectiva": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1106,
+        "total_cases_3m": 3319
+      },
+      "HT - Consultas generales": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1065,
+        "total_cases_3m": 3196
+      },
+      "Sin caso de uso": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1062,
+        "total_cases_3m": 3187
+      },
+      "Conversaciones t¾xicas": {
+        "commerce_groups": [
+          "Generales Compra",
+          "PDD",
+          "Pre Venta",
+          "FBM Sellers",
+          "Pagos",
+          "Experiencia Impositiva",
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 2681,
+        "total_cases_3m": 3164
+      },
+      "Dudas sobre usabilidad": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1046,
+        "total_cases_3m": 3140
+      },
+      "Clips": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1043,
+        "total_cases_3m": 3131
+      },
+      "Reglas para publicar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1040,
+        "total_cases_3m": 3121
+      },
+      "Restricci¾n fiscal": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 1022,
+        "total_cases_3m": 3067
+      },
+      "Gesti¾n de venta": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 960,
+        "total_cases_3m": 2880
+      },
+      "Sugerencias Catßlogo": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 942,
+        "total_cases_3m": 2828
+      },
+      "PNR Low Cost": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 976,
+        "total_cases_3m": 2785
+      },
+      "Quiere reclamar por inconvenientes en el recorrido o en el service center": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 927,
+        "total_cases_3m": 2783
+      },
+      "[Proximity] Comprador se contacta con reclamo en proceso": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 923,
+        "total_cases_3m": 2769
+      },
+      "Bonificaci¾n retiro FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 921,
+        "total_cases_3m": 2764
+      },
+      "Como funciona Places": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 914,
+        "total_cases_3m": 2743
+      },
+      "Oferta de rutas": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 884,
+        "total_cases_3m": 2652
+      },
+      "Optin": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 869,
+        "total_cases_3m": 2608
+      },
+      "PNR C Riesgo Alto": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 1025,
+        "total_cases_3m": 2589
+      },
+      "Problemas Retiro": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 838,
+        "total_cases_3m": 2514
+      },
+      "Seller judge": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 835,
+        "total_cases_3m": 2506
+      },
+      "Tiene un inconviente con sus metricas de Nivel de Lealtad": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 832,
+        "total_cases_3m": 2497
+      },
+      "Impuesto para facturar": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 817,
+        "total_cases_3m": 2451
+      },
+      "Devolucion en camino": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 799,
+        "total_cases_3m": 2399
+      },
+      "Duda sobre percepci¾n especifica cobrada": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 794,
+        "total_cases_3m": 2384
+      },
+      "[Proximity] C riesgo alto": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 782,
+        "total_cases_3m": 2348
+      },
+      "Fraudes PCF ": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 781,
+        "total_cases_3m": 2345
+      },
+      "Demora en IS": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 778,
+        "total_cases_3m": 2334
+      },
+      "ModeraþÒo - ML e MP": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 770,
+        "total_cases_3m": 2312
+      },
+      "Importaciones": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 755,
+        "total_cases_3m": 2267
+      },
+      "CBT - Modificar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 742,
+        "total_cases_3m": 2227
+      },
+      "Bonificaci¾n FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 729,
+        "total_cases_3m": 2189
+      },
+      "[Proximity] C se queja de percepci¾n": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 720,
+        "total_cases_3m": 2160
+      },
+      "Consultas Informativas - Beneficios y Funcionalidades": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 701,
+        "total_cases_3m": 2103
+      },
+      "CBT - Pricing": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 688,
+        "total_cases_3m": 2066
+      },
+      "Dudas generales sobre aplicaci¾n de retenciones": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 685,
+        "total_cases_3m": 2056
+      },
+      "Dudas sobre Deuda /DÚbito (Automßtico o forzado)": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 676,
+        "total_cases_3m": 2030
+      },
+      "Tiene dudas con los pagos y facturas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 663,
+        "total_cases_3m": 1991
+      },
+      "Dudas Informativas Retiro": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 661,
+        "total_cases_3m": 1985
+      },
+      "Foto incorrecta": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 680,
+        "total_cases_3m": 1891
+      },
+      "Quiere ser una Agencia MELI": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 630,
+        "total_cases_3m": 1890
+      },
+      "Denuncia a un comprador": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 611,
+        "total_cases_3m": 1833
+      },
+      "Comprador reclama que no deberÝamos cobrarle el costo de envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 603,
+        "total_cases_3m": 1810
+      },
+      "Denuncia Spoof": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 593,
+        "total_cases_3m": 1779
+      },
+      "Medicamentos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 587,
+        "total_cases_3m": 1763
+      },
+      "Inscripci¾n/Exclusi¾n de IIBB o IVA": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 561,
+        "total_cases_3m": 1684
+      },
+      "Consultas sobre reprocesamiento de cuotas": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 561,
+        "total_cases_3m": 1683
+      },
+      "Proximity - Extra": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 559,
+        "total_cases_3m": 1679
+      },
+      "Contextualizaci¾n del caso": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 550,
+        "total_cases_3m": 1652
+      },
+      "NA (INP)": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 540,
+        "total_cases_3m": 1622
+      },
+      "┐C¾mo funciona Mercado Puntos / Meli+ y cußles son los beneficios?": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 537,
+        "total_cases_3m": 1612
+      },
+      "Espacio de almacenamiento": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 530,
+        "total_cases_3m": 1590
+      },
+      "General": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 528,
+        "total_cases_3m": 1586
+      },
+      "Michelin": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 526,
+        "total_cases_3m": 1579
+      },
+      "Tiene fallas en el cup¾n": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 525,
+        "total_cases_3m": 1576
+      },
+      "Devoluci¾n retirada": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 524,
+        "total_cases_3m": 1572
+      },
+      "CBT - Funcionalidades vendedor": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 513,
+        "total_cases_3m": 1541
+      },
+      "CBT - Publicar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 513,
+        "total_cases_3m": 1541
+      },
+      "Emissor externo": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 512,
+        "total_cases_3m": 1536
+      },
+      "Gesti¾n de publicaciones FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 509,
+        "total_cases_3m": 1528
+      },
+      "Usuario solicita modificar sus datos fiscales": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 508,
+        "total_cases_3m": 1526
+      },
+      "Devoluci¾n con triage": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 502,
+        "total_cases_3m": 1507
+      },
+      "Problema com coleta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 496,
+        "total_cases_3m": 1490
+      },
+      "Onboarding Extra": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 490,
+        "total_cases_3m": 1472
+      },
+      "Tiene dudas sobre el funcionamiento de las devoluciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 479,
+        "total_cases_3m": 1439
+      },
+      "Quiere gestionar su cuenta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 473,
+        "total_cases_3m": 1420
+      },
+      "Dudas sobre funcionalidades de nuestros servicios (Compra Protegida, Supermercado, etc)": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 470,
+        "total_cases_3m": 1411
+      },
+      "CBT - Cancelaciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 470,
+        "total_cases_3m": 1411
+      },
+      "PNR TKO C/V": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 497,
+        "total_cases_3m": 1384
+      },
+      "Estado del retiro": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 436,
+        "total_cases_3m": 1310
+      },
+      "Usuario quiere cancelar la cuenta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 433,
+        "total_cases_3m": 1300
+      },
+      "Dudas Inbound": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 426,
+        "total_cases_3m": 1280
+      },
+      "Migraci¾n de carriers": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 419,
+        "total_cases_3m": 1259
+      },
+      "Duplicadas": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 416,
+        "total_cases_3m": 1249
+      },
+      "Denuncia de publicaci¾n": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 586,
+        "total_cases_3m": 1220
+      },
+      "Dudas sobre datos de facturaci¾n": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 396,
+        "total_cases_3m": 1190
+      },
+      "Dudas relacionadas con Mercado EnvÝos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 395,
+        "total_cases_3m": 1186
+      },
+      "Proximity Seller": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 386,
+        "total_cases_3m": 1160
+      },
+      "Fecha de pago": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 385,
+        "total_cases_3m": 1157
+      },
+      "Suspensi¾n temporal": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 380,
+        "total_cases_3m": 1140
+      },
+      "Held": {
+        "commerce_groups": [
+          "Moderaciones",
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 422,
+        "total_cases_3m": 1117
+      },
+      "Buy Box": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 367,
+        "total_cases_3m": 1101
+      },
+      "Dudas sobre Pagos": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 365,
+        "total_cases_3m": 1095
+      },
+      "Quiere saber sobre la acreditaci¾n del dinero": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 358,
+        "total_cases_3m": 1074
+      },
+      "Preguntas y respuestas": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 352,
+        "total_cases_3m": 1058
+      },
+      "NI (INP)": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 348,
+        "total_cases_3m": 1045
+      },
+      "Comprador posee errores o restricciones para comprar o preguntar": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 337,
+        "total_cases_3m": 1013
+      },
+      "CBT - Calidad de foto": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 336,
+        "total_cases_3m": 1009
+      },
+      "Error en el facturador o anexar XML": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 333,
+        "total_cases_3m": 1001
+      },
+      "Cancelaci¾n de ventas FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 332,
+        "total_cases_3m": 996
+      },
+      "Publicaciones Revisadas": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 324,
+        "total_cases_3m": 974
+      },
+      "[Proximity] - C no puede modificar direcci¾n de entrega": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 323,
+        "total_cases_3m": 969
+      },
+      "Consultas Informativas": {
+        "commerce_groups": [
+          "Pre Venta",
+          "Post Venta",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 719,
+        "total_cases_3m": 956
+      },
+      "Informativa Stock": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 316,
+        "total_cases_3m": 949
+      },
+      "Upgrade fiscal": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 309,
+        "total_cases_3m": 929
+      },
+      "Generales Facturaci¾n": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 303,
+        "total_cases_3m": 910
+      },
+      "Foto correcta": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 301,
+        "total_cases_3m": 903
+      },
+      "CBT - Etiquetas": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 297,
+        "total_cases_3m": 892
+      },
+      "Costos inventario FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 288,
+        "total_cases_3m": 865
+      },
+      "Caso Recusado": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 288,
+        "total_cases_3m": 865
+      },
+      "Devoluciones Triage": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 281,
+        "total_cases_3m": 845
+      },
+      "Calificaci¾n reclamo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 275,
+        "total_cases_3m": 826
+      },
+      "Dudas o problemas tÚcnicas para descargar documentos": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 274,
+        "total_cases_3m": 824
+      },
+      "Problemas Stock": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 273,
+        "total_cases_3m": 820
+      },
+      "Pedimos usuario": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 271,
+        "total_cases_3m": 813
+      },
+      "Pago de ruta": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 270,
+        "total_cases_3m": 811
+      },
+      "Productos peligrosos (HAZMAT)": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 264,
+        "total_cases_3m": 794
+      },
+      "Consultas sobre Intereses": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 251,
+        "total_cases_3m": 753
+      },
+      "Sociedad": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 249,
+        "total_cases_3m": 747
+      },
+      "Problemas SPD": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 247,
+        "total_cases_3m": 743
+      },
+      "Problemas en recibimiento": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 243,
+        "total_cases_3m": 730
+      },
+      "Publicar similar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 243,
+        "total_cases_3m": 729
+      },
+      "Comprador tiene dudas sobre el funcionamiento del costo de envÝo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 239,
+        "total_cases_3m": 718
+      },
+      "Retenciones CBT": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 236,
+        "total_cases_3m": 708
+      },
+      "Error en el proceso de escaneo": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 229,
+        "total_cases_3m": 688
+      },
+      "Guardia Urbana": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 224,
+        "total_cases_3m": 673
+      },
+      "Problemas con el transportista": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 223,
+        "total_cases_3m": 669
+      },
+      "TBD AP CBT": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 222,
+        "total_cases_3m": 668
+      },
+      "Onboarding ME1": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 220,
+        "total_cases_3m": 661
+      },
+      "Onboarding Proximity": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 214,
+        "total_cases_3m": 643
+      },
+      "Integradores": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 212,
+        "total_cases_3m": 638
+      },
+      "No encuentra su palabra clave para recibir el producto ": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 210,
+        "total_cases_3m": 632
+      },
+      "Consultas CBT - vendedor MP": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 206,
+        "total_cases_3m": 618
+      },
+      "Quiere cancelar - sin ME": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 203,
+        "total_cases_3m": 610
+      },
+      "INP": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 202,
+        "total_cases_3m": 606
+      },
+      "Cual el status de mi anulaci¾n?": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 199,
+        "total_cases_3m": 597
+      },
+      "Denuncia Pßgina falsa": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 197,
+        "total_cases_3m": 592
+      },
+      "Acreditaci¾n Sellers AP": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 196,
+        "total_cases_3m": 590
+      },
+      "Trade In - Trocafone": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 194,
+        "total_cases_3m": 582
+      },
+      "Onboarding ME OFF": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 186,
+        "total_cases_3m": 560
+      },
+      "MED Multicanal": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 185,
+        "total_cases_3m": 556
+      },
+      "Dudas sobre Impuestos": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 185,
+        "total_cases_3m": 556
+      },
+      "Acuerdo": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 183,
+        "total_cases_3m": 551
+      },
+      "Penalizaciones en IS": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 183,
+        "total_cases_3m": 550
+      },
+      "Consulta por pago duplicado": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 182,
+        "total_cases_3m": 548
+      },
+      "Hist¾rico de infracciones": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 182,
+        "total_cases_3m": 547
+      },
+      "Item abandonado": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 178,
+        "total_cases_3m": 535
+      },
+      "Quiere dar de baja/eliminar un paquete en la app": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 177,
+        "total_cases_3m": 531
+      },
+      "Reportar un incidente": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 177,
+        "total_cases_3m": 531
+      },
+      "Infracci¾n detectada ": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 173,
+        "total_cases_3m": 519
+      },
+      "CAP": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 166,
+        "total_cases_3m": 498
+      },
+      "DÚbito confirmado": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 165,
+        "total_cases_3m": 496
+      },
+      "Armas": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 164,
+        "total_cases_3m": 492
+      },
+      "CBT - Descuentos": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 161,
+        "total_cases_3m": 484
+      },
+      "Consejos PR - C¾mo publicar": {
+        "commerce_groups": [
+          "Post Venta",
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 247,
+        "total_cases_3m": 479
+      },
+      "Catßlogo": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 158,
+        "total_cases_3m": 476
+      },
+      "Pedido de legales": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 157,
+        "total_cases_3m": 472
+      },
+      "Pagos": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 153,
+        "total_cases_3m": 459
+      },
+      "NF Recusada": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 151,
+        "total_cases_3m": 453
+      },
+      "Problemas al pagar con Credits": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 149,
+        "total_cases_3m": 448
+      },
+      "CBT - Onboarding seller": {
+        "commerce_groups": [
+          "Pre Venta",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 264,
+        "total_cases_3m": 446
+      },
+      "Equipo Comercial": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 146,
+        "total_cases_3m": 438
+      },
+      "Descarte de productos": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 145,
+        "total_cases_3m": 436
+      },
+      "Consulta por recuperos": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 144,
+        "total_cases_3m": 433
+      },
+      "HT - Otros": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 141,
+        "total_cases_3m": 424
+      },
+      "CBT - Devoluci¾n Express": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 141,
+        "total_cases_3m": 423
+      },
+      "Soporte MeLi": {
+        "commerce_groups": [
+          "Generales Compra",
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 183,
+        "total_cases_3m": 417
+      },
+      "Despacho Demorado": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 138,
+        "total_cases_3m": 415
+      },
+      "Temporal AP": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 137,
+        "total_cases_3m": 413
+      },
+      "Detalle de infracciones": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 137,
+        "total_cases_3m": 411
+      },
+      "┐C¾mo comprar el servicio?": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 135,
+        "total_cases_3m": 406
+      },
+      "TelÚfono rojo": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 135,
+        "total_cases_3m": 405
+      },
+      "EnvÝo rechazado": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 133,
+        "total_cases_3m": 401
+      },
+      "Automßtica": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 133,
+        "total_cases_3m": 399
+      },
+      "CBT - Pedidos del vendedor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 125,
+        "total_cases_3m": 375
+      },
+      "Devoluci¾n medio OFF - Dinero en Mercado Pago": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 124,
+        "total_cases_3m": 374
+      },
+      "Acuerdos Comerciales": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 124,
+        "total_cases_3m": 373
+      },
+      "Compatibilidad": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 124,
+        "total_cases_3m": 372
+      },
+      "Baixa Manual": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 122,
+        "total_cases_3m": 367
+      },
+      "Decodificadores": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 122,
+        "total_cases_3m": 367
+      },
+      "Desactivar panel FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 115,
+        "total_cases_3m": 346
+      },
+      "Usar FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 114,
+        "total_cases_3m": 342
+      },
+      "Gesti¾n de cuenta": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 112,
+        "total_cases_3m": 337
+      },
+      "LGPD": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 107,
+        "total_cases_3m": 321
+      },
+      "Informativa Colecta": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 98,
+        "total_cases_3m": 296
+      },
+      "Otros - VDP": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 98,
+        "total_cases_3m": 295
+      },
+      "Devoluci¾n en camino": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 96,
+        "total_cases_3m": 290
+      },
+      "Quiere solicitar material": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 95,
+        "total_cases_3m": 285
+      },
+      "Informaci¾n General": {
+        "commerce_groups": [
+          "Pre Venta",
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 133,
+        "total_cases_3m": 275
+      },
+      "Duda conceptuales sobre percepciones o cambiar datos fiscales": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 91,
+        "total_cases_3m": 274
+      },
+      "Modificar IS": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 89,
+        "total_cases_3m": 267
+      },
+      "No aparece en el mapa de Meli": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 88,
+        "total_cases_3m": 264
+      },
+      "Retiro de producto vendible": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 86,
+        "total_cases_3m": 258
+      },
+      "Problemas Temas Fiscales": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 84,
+        "total_cases_3m": 254
+      },
+      "C¾mo contacto al vendedor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 84,
+        "total_cases_3m": 252
+      },
+      "Cuentas y juegos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 80,
+        "total_cases_3m": 242
+      },
+      "Recebimento de saca": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 80,
+        "total_cases_3m": 242
+      },
+      "Dudas sobre Saldos a favor / Pagos duplicados": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 79,
+        "total_cases_3m": 239
+      },
+      "Suspensi¾n permanente": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 79,
+        "total_cases_3m": 238
+      },
+      "Despacho Flex": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 76,
+        "total_cases_3m": 230
+      },
+      "Moderaciones para KITS virtuales": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 75,
+        "total_cases_3m": 226
+      },
+      "Fotos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 73,
+        "total_cases_3m": 219
+      },
+      "Modificaci¾n de domicilio fiscal": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 72,
+        "total_cases_3m": 218
+      },
+      "Evasi¾n": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 72,
+        "total_cases_3m": 216
+      },
+      "Dudas sobre medios de pago y cobros de las suscripciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 70,
+        "total_cases_3m": 211
+      },
+      "Analisis masivo": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 69,
+        "total_cases_3m": 209
+      },
+      "Precio minimo": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 69,
+        "total_cases_3m": 207
+      },
+      "Cuenta activa": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 67,
+        "total_cases_3m": 202
+      },
+      "Baixar One App": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 67,
+        "total_cases_3m": 202
+      },
+      "Configuraci¾n": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 66,
+        "total_cases_3m": 199
+      },
+      "Informativa Primeros Pasos": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 65,
+        "total_cases_3m": 197
+      },
+      "Equipamiento mÚdico": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 63,
+        "total_cases_3m": 191
+      },
+      "Warning": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 62,
+        "total_cases_3m": 187
+      },
+      "Paquete": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 59,
+        "total_cases_3m": 179
+      },
+      "C¾mo compra un clasificado": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 59,
+        "total_cases_3m": 177
+      },
+      "Devoluci¾n medio ON - Dinero en Mercado Pago": {
+        "commerce_groups": [
+          "Pagos",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 97,
+        "total_cases_3m": 177
+      },
+      "Troca de produtos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 58,
+        "total_cases_3m": 174
+      },
+      "Producto retenido / confiscado": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 58,
+        "total_cases_3m": 174
+      },
+      "Proximity": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 57,
+        "total_cases_3m": 172
+      },
+      "Contacto con asesor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 55,
+        "total_cases_3m": 167
+      },
+      "Suministros": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 54,
+        "total_cases_3m": 164
+      },
+      "Por quÚ rechazaron mi pago?": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 54,
+        "total_cases_3m": 163
+      },
+      "High PDD": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 53,
+        "total_cases_3m": 161
+      },
+      "Sustancias prohibidas": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 53,
+        "total_cases_3m": 160
+      },
+      "AmpliaþÒo de Consulta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 53,
+        "total_cases_3m": 160
+      },
+      "Vinculaci¾n del email": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 52,
+        "total_cases_3m": 156
+      },
+      "Animales": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 48,
+        "total_cases_3m": 144
+      },
+      "CBT - FBM": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 48,
+        "total_cases_3m": 144
+      },
+      "Comprador reclama que el costo de envÝo es elevado": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 47,
+        "total_cases_3m": 141
+      },
+      "Pagos (Facturaci¾n)": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 44,
+        "total_cases_3m": 132
+      },
+      "Solicitudes/Gestiones por ser agentes de retenci¾n": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 43,
+        "total_cases_3m": 131
+      },
+      "CBT - Consultas informativas": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 43,
+        "total_cases_3m": 130
+      },
+      "Tiene una queja por el comportamiento del transportista": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 41,
+        "total_cases_3m": 123
+      },
+      "CBT - Informativas": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 40,
+        "total_cases_3m": 122
+      },
+      "OPD": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 40,
+        "total_cases_3m": 121
+      },
+      "┐C¾mo cancelar mi suscripci¾n?": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 39,
+        "total_cases_3m": 119
+      },
+      "Cuenta pausada o bloqueada": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 39,
+        "total_cases_3m": 118
+      },
+      "Producto prohibido": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 39,
+        "total_cases_3m": 117
+      },
+      "Informativa Retiro": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 39,
+        "total_cases_3m": 117
+      },
+      "Productos homologados": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 38,
+        "total_cases_3m": 114
+      },
+      "Informativa Inbound": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 37,
+        "total_cases_3m": 113
+      },
+      "Mercado Puntos - Suscripciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 36,
+        "total_cases_3m": 108
+      },
+      "Informativa Temas Fiscales": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 36,
+        "total_cases_3m": 108
+      },
+      "MP Retiros CBT": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 36,
+        "total_cases_3m": 108
+      },
+      "Transferencia de Stock": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 35,
+        "total_cases_3m": 107
+      },
+      "Dados do consultor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 34,
+        "total_cases_3m": 103
+      },
+      "[Proximity] C se contacta despuÚs de 24 horas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 33,
+        "total_cases_3m": 101
+      },
+      "Funcionalidades generales Prustomer": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 33,
+        "total_cases_3m": 100
+      }
+    },
+    "ENVIRONMENT": {
+      "FBM": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 422528,
+        "total_cases_3m": 1161972
+      },
+      "XD": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 333997,
+        "total_cases_3m": 955297
+      },
+      "MP_ON": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 177180,
+        "total_cases_3m": 417593
+      },
+      "DS": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 100924,
+        "total_cases_3m": 266848
+      },
+      "FLEX": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 75560,
+        "total_cases_3m": 190789
+      }
+    },
+    "PROCESO": {
+      "PNR - MP": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 136521,
+        "total_cases_3m": 405599
+      },
+      "Posterior a la Entrega": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 125700,
+        "total_cases_3m": 377102
+      },
+      "Reputaci¾n": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 104261,
+        "total_cases_3m": 312783
+      },
+      "Viaje del paquete - Comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 103120,
+        "total_cases_3m": 309362
+      },
+      "Arrepentimiento - XD": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 92707,
+        "total_cases_3m": 277927
+      },
+      "Reputaci¾n ME": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 80420,
+        "total_cases_3m": 241260
+      },
+      "Defectuoso - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 76166,
+        "total_cases_3m": 228498
+      },
+      "Arrepentimiento - FBM": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 65670,
+        "total_cases_3m": 196549
+      },
+      "Defectuoso - XD": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 63232,
+        "total_cases_3m": 189696
+      },
+      "Diferente - XD": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 62835,
+        "total_cases_3m": 188507
+      },
+      "Post Compra Funcionalidades Vendedor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 61095,
+        "total_cases_3m": 183287
+      },
+      "Despacho Ventas y Publicaciones": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 52163,
+        "total_cases_3m": 156491
+      },
+      "Estado del pago de una compra - Buyer": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 51683,
+        "total_cases_3m": 155051
+      },
+      "Incompleto - FBM": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 46201,
+        "total_cases_3m": 135965
+      },
+      "Defectuoso - 1P&PL": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 41332,
+        "total_cases_3m": 123996
+      },
+      "Diferente - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 41199,
+        "total_cases_3m": 123598
+      },
+      "PDD - Fotos": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 40980,
+        "total_cases_3m": 122942
+      },
+      "Incompleto - XD": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 38709,
+        "total_cases_3m": 114425
+      },
+      "CBT - Reputation": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 33369,
+        "total_cases_3m": 100108
+      },
+      "PR - Propiedad intelectual": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 30201,
+        "total_cases_3m": 90603
+      },
+      "Durante la Entrega": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 28401,
+        "total_cases_3m": 85205
+      },
+      "Drivers": {
+        "commerce_groups": [
+          "ME Drivers"
+        ],
+        "avg_monthly_cases": 24694,
+        "total_cases_3m": 74082
+      },
+      "Pre Compra": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 24271,
+        "total_cases_3m": 72815
+      },
+      "Diferente - CBT": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 24102,
+        "total_cases_3m": 72308
+      },
+      "Arrepentimiento - CBT": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 23302,
+        "total_cases_3m": 69906
+      },
+      "Reversa": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 20062,
+        "total_cases_3m": 60188
+      },
+      "Post Compra funcionalidades Comprador - Proximity": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 18677,
+        "total_cases_3m": 56032
+      },
+      "Gesti¾n de Publicaci¾n": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 17854,
+        "total_cases_3m": 53562
+      },
+      "Emision de Nota Fiscal": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 17847,
+        "total_cases_3m": 53542
+      },
+      "Arrepentimiento - Flex": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 16568,
+        "total_cases_3m": 49467
+      },
+      "Gestiones Operativas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 16361,
+        "total_cases_3m": 49085
+      },
+      "CBT - Moderations": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 15399,
+        "total_cases_3m": 46197
+      },
+      "Defectuoso - MP": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 14891,
+        "total_cases_3m": 43745
+      },
+      "FBM - Post Inbound": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 14292,
+        "total_cases_3m": 42877
+      },
+      "MED - PDD Low cost": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 14157,
+        "total_cases_3m": 42472
+      },
+      "Arrepentimiento - 1P&PL": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 13965,
+        "total_cases_3m": 41896
+      },
+      "Defectuoso - Flex": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 14014,
+        "total_cases_3m": 41879
+      },
+      "Diferente - Flex": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 13784,
+        "total_cases_3m": 41251
+      },
+      "Caja VacÝa - FBM": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 13043,
+        "total_cases_3m": 38992
+      },
+      "PNR - Contradictorio - FBM": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 13362,
+        "total_cases_3m": 37750
+      },
+      "PNR - Previo al Despacho - FBM": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 12704,
+        "total_cases_3m": 37570
+      },
+      "Apelaciones Seller XDDS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 11969,
+        "total_cases_3m": 35907
+      },
+      "Defectuoso - DS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 11656,
+        "total_cases_3m": 34970
+      },
+      "PR - TÚcnica prohibida": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 11520,
+        "total_cases_3m": 34560
+      },
+      "Defectuoso - Super - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 11403,
+        "total_cases_3m": 34209
+      },
+      "Arrepentimiento - MP": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 11809,
+        "total_cases_3m": 34052
+      },
+      "Facturaci¾n": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 11291,
+        "total_cases_3m": 33874
+      },
+      "Viaje del paquete - Vendedor": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 10751,
+        "total_cases_3m": 32255
+      },
+      "PNR - Contradictorio - XD": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 11559,
+        "total_cases_3m": 32182
+      },
+      "Potenciar Ventas": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 10698,
+        "total_cases_3m": 32096
+      },
+      "Incompleto - Flex": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 10695,
+        "total_cases_3m": 31770
+      },
+      "Afiliados ML": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 10545,
+        "total_cases_3m": 31636
+      },
+      "Places Kangu": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 10393,
+        "total_cases_3m": 31179
+      },
+      "Loyalty": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 10344,
+        "total_cases_3m": 31032
+      },
+      "PNR - Contradictorio - Flex": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 10412,
+        "total_cases_3m": 30600
+      },
+      "Arrepentimiento - DS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 10076,
+        "total_cases_3m": 30228
+      },
+      "CBT - ME Reputation": {
+        "commerce_groups": [
+          "Generales Compra",
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 17472,
+        "total_cases_3m": 29943
+      },
+      "Apelaciones  - Retorno Buyer": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 9352,
+        "total_cases_3m": 28058
+      },
+      "FBM - Pre Inbound": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 9298,
+        "total_cases_3m": 27895
+      },
+      "Caja VacÝa - XD": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 9163,
+        "total_cases_3m": 27490
+      },
+      "Asignaci¾n del Contßctanos PDD FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 8877,
+        "total_cases_3m": 26632
+      },
+      "Arrepentimiento - Super - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 8511,
+        "total_cases_3m": 25534
+      },
+      "MED - Recontacto - Parciales": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 8189,
+        "total_cases_3m": 24568
+      },
+      "Diferente - DS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 7805,
+        "total_cases_3m": 23416
+      },
+      "Reputaci¾n ME Masivos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 7451,
+        "total_cases_3m": 22354
+      },
+      "Incompleto - 1P&PL": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 6801,
+        "total_cases_3m": 20404
+      },
+      "FBM - Inventario": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 6635,
+        "total_cases_3m": 19907
+      },
+      "Incompleto - Super - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 6533,
+        "total_cases_3m": 19599
+      },
+      "Diferente - 1P&PL": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 5954,
+        "total_cases_3m": 17864
+      },
+      "Diferente - MP": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 5722,
+        "total_cases_3m": 16710
+      },
+      "Defectuoso - CBT": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 5548,
+        "total_cases_3m": 16646
+      },
+      "Asignaci¾n del Contßctanos PDD DS&XD": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 5211,
+        "total_cases_3m": 15634
+      },
+      "PR - ArtÝculos prohibidos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 5143,
+        "total_cases_3m": 15431
+      },
+      "CBT - Package journey": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 5052,
+        "total_cases_3m": 15157
+      },
+      "Apelaciones Seller": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 5041,
+        "total_cases_3m": 15123
+      },
+      "Incompleto - CBT": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 5096,
+        "total_cases_3m": 14493
+      },
+      "Caja VacÝa - CBT": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 4828,
+        "total_cases_3m": 14484
+      },
+      "Apelaciones_RTB_XDDS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 4568,
+        "total_cases_3m": 13705
+      },
+      "PNR - Previo al Despacho - DS": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 4502,
+        "total_cases_3m": 13366
+      },
+      "Datos fiscales": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 4413,
+        "total_cases_3m": 13240
+      },
+      "PNR - Contradictorio - CBT": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 4553,
+        "total_cases_3m": 13126
+      },
+      "Incompleto - DS": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 4421,
+        "total_cases_3m": 12919
+      },
+      "Incompleto - MP": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 4482,
+        "total_cases_3m": 12789
+      },
+      "Diferente - Super - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 4180,
+        "total_cases_3m": 12541
+      },
+      "Calidad de foto": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 3963,
+        "total_cases_3m": 11890
+      },
+      "PNR previo al despacho - Super - FBM": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 3816,
+        "total_cases_3m": 11450
+      },
+      "Antes de publicar": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 3569,
+        "total_cases_3m": 10708
+      },
+      "PNR - Previo al Despacho - 1P&PL": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 3601,
+        "total_cases_3m": 10598
+      },
+      "PNR - Previo al Despacho - XD": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 3388,
+        "total_cases_3m": 9927
+      },
+      "FBM - Inbound - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 3259,
+        "total_cases_3m": 9778
+      },
+      "FBM - Retiro de Stock - Cx One": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 3189,
+        "total_cases_3m": 9568
+      },
+      "Retenciones al cobrar": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 3182,
+        "total_cases_3m": 9546
+      },
+      "Reputaci¾n ML Masivos": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 3073,
+        "total_cases_3m": 9221
+      },
+      "Low Cost -  Dry": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 2868,
+        "total_cases_3m": 8604
+      },
+      "Post Compra Funcionalidades CBT": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 2783,
+        "total_cases_3m": 8349
+      },
+      "CBT - Listings": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 2594,
+        "total_cases_3m": 7782
+      },
+      "Apelaciones_Buyer": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 2483,
+        "total_cases_3m": 7451
+      },
+      "FBM - Funcionalidades": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 2432,
+        "total_cases_3m": 7297
+      },
+      "FBM - Devoluciones": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 2217,
+        "total_cases_3m": 6652
+      },
+      "PNR - Contradictorio - 1P&PL": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 2210,
+        "total_cases_3m": 6530
+      },
+      "Anulaci¾n de Venta": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 2136,
+        "total_cases_3m": 6408
+      },
+      "PNR - Contradictorio - DS": {
+        "commerce_groups": [
+          "PNR",
+          "PDD"
+        ],
+        "avg_monthly_cases": 2421,
+        "total_cases_3m": 6132
+      },
+      "Asignaci¾n del Contßctanos PDDMP Flex": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 2090,
+        "total_cases_3m": 6127
+      },
+      "Caja VacÝa - 1P&PL": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 2039,
+        "total_cases_3m": 6117
+      },
+      "CBT - Billing": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 2008,
+        "total_cases_3m": 6026
+      },
+      "PNR contradictorio - Super - FBM": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 1848,
+        "total_cases_3m": 5546
+      },
+      "CBT - Reverse": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1841,
+        "total_cases_3m": 5523
+      },
+      "ML | SHS - Soluþ§es GenÚricas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1770,
+        "total_cases_3m": 5310
+      },
+      "Caja VacÝa - DS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1695,
+        "total_cases_3m": 5086
+      },
+      "CBT - Dispatch, Sales and Listings": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1688,
+        "total_cases_3m": 5066
+      },
+      "Denuncia de usuario": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1537,
+        "total_cases_3m": 4613
+      },
+      "Instagram Consulta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1509,
+        "total_cases_3m": 4528
+      },
+      "Caja VacÝa - Flex": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1371,
+        "total_cases_3m": 4114
+      },
+      "CBT - Publication Management": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 1332,
+        "total_cases_3m": 3997
+      },
+      "PR - Datos Personales": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 1326,
+        "total_cases_3m": 3980
+      },
+      "Redes - Reclame aqui (ML)": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1166,
+        "total_cases_3m": 3498
+      },
+      "PNR - Previo al Despacho - Flex": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 1149,
+        "total_cases_3m": 3449
+      },
+      "MED - PNR Low Cost": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 1141,
+        "total_cases_3m": 3424
+      },
+      "Costos de envÝo - Comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 1126,
+        "total_cases_3m": 3378
+      },
+      "MED - Cambios XD&DS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 1111,
+        "total_cases_3m": 3335
+      },
+      "FBM - Inventory - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 1073,
+        "total_cases_3m": 3220
+      },
+      "Percepciones": {
+        "commerce_groups": [
+          "Experiencia Impositiva"
+        ],
+        "avg_monthly_cases": 995,
+        "total_cases_3m": 2985
+      },
+      "PNR - Previo al despacho - CBT": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 873,
+        "total_cases_3m": 2620
+      },
+      "Despacho Ventas y Publicaciones Masivos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 851,
+        "total_cases_3m": 2553
+      },
+      "Caja vacÝa - Super - FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 818,
+        "total_cases_3m": 2455
+      },
+      "CBT - Seller Features": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 785,
+        "total_cases_3m": 2357
+      },
+      "FBM - Stock Withdrawal - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 671,
+        "total_cases_3m": 2013
+      },
+      "Reembolso de la compra MP": {
+        "commerce_groups": [
+          "Pagos"
+        ],
+        "avg_monthly_cases": 653,
+        "total_cases_3m": 1961
+      },
+      "Referidos Legales": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 536,
+        "total_cases_3m": 1608
+      },
+      "CBT - Operational Management": {
+        "commerce_groups": [
+          "Pre Venta",
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 836,
+        "total_cases_3m": 1531
+      },
+      "PR - TÚcnica prohibida Masivos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 452,
+        "total_cases_3m": 1358
+      },
+      "FBM - Outbound": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 450,
+        "total_cases_3m": 1352
+      },
+      "Caja vacÝa - MP": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 428,
+        "total_cases_3m": 1284
+      },
+      "Post Compra funcionalidades Vendedor - Proximity": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 398,
+        "total_cases_3m": 1195
+      },
+      "CBT - Boosters": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 397,
+        "total_cases_3m": 1192
+      },
+      "Facebook Consulta": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 377,
+        "total_cases_3m": 1133
+      },
+      "MED - Apelaciones Coberturas parciales": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 371,
+        "total_cases_3m": 1115
+      },
+      "Preventa Proximity": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 371,
+        "total_cases_3m": 1113
+      },
+      "Apelaciones_buyer_XDDS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 310,
+        "total_cases_3m": 930
+      },
+      "Asignaci¾n del Contßctanos Comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 291,
+        "total_cases_3m": 875
+      },
+      "FBM - Returns - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 272,
+        "total_cases_3m": 817
+      },
+      "Guardia Urbana": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 225,
+        "total_cases_3m": 677
+      },
+      "CBT - Seller MP Features": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 210,
+        "total_cases_3m": 632
+      },
+      "MED - Cambios FBM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 209,
+        "total_cases_3m": 627
+      },
+      "Calidad de foto Masivos": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 199,
+        "total_cases_3m": 599
+      },
+      "CBT - Despachar ME": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 185,
+        "total_cases_3m": 555
+      },
+      "MercadoShops": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 180,
+        "total_cases_3m": 540
+      },
+      "Asignaci¾n del Contßctanos ME Pre Despacho": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 177,
+        "total_cases_3m": 531
+      },
+      "CBT - Sale Cancellation": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 171,
+        "total_cases_3m": 515
+      },
+      "Asignaci¾n del Contßctanos Pre Venta": {
+        "commerce_groups": [
+          "Pre Venta"
+        ],
+        "avg_monthly_cases": 148,
+        "total_cases_3m": 444
+      },
+      "Asignaci¾n del Contactanos Post Venta": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 139,
+        "total_cases_3m": 417
+      },
+      "Marketplace Kangu": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 125,
+        "total_cases_3m": 377
+      },
+      "Defectuoso - Super - Flex": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 118,
+        "total_cases_3m": 355
+      },
+      "Indemnidades": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 117,
+        "total_cases_3m": 351
+      },
+      "PDD - Default - Mediaciones": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 117,
+        "total_cases_3m": 351
+      },
+      "Rollback masivo": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 112,
+        "total_cases_3m": 336
+      },
+      "Privacidad de datos - LGPD": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 110,
+        "total_cases_3m": 332
+      },
+      "Proximity ME": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 104,
+        "total_cases_3m": 312
+      },
+      "Libro de Reclamaciones - CAP": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 102,
+        "total_cases_3m": 308
+      },
+      "MED - Apelaciones Coberturas parciales Xd&DS + FLE": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 99,
+        "total_cases_3m": 299
+      },
+      "X Consultas": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 93,
+        "total_cases_3m": 279
+      },
+      "Incompleto - Super - Flex": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 81,
+        "total_cases_3m": 243
+      },
+      "Asignaci¾n del Contßctanos - Prustomer": {
+        "commerce_groups": [
+          "Moderaciones"
+        ],
+        "avg_monthly_cases": 80,
+        "total_cases_3m": 242
+      },
+      "FBM - Outbound - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 76,
+        "total_cases_3m": 228
+      },
+      "FBM - Low Cost Respuesta": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 74,
+        "total_cases_3m": 223
+      },
+      "Asignaci¾n del contßctanos CBT USA": {
+        "commerce_groups": [
+          "Post Venta"
+        ],
+        "avg_monthly_cases": 73,
+        "total_cases_3m": 221
+      },
+      "Derecho de Petici¾n MCO - Legales": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 65,
+        "total_cases_3m": 195
+      },
+      "Diferente - Super - Flex": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 63,
+        "total_cases_3m": 189
+      },
+      "ME Contingencia Comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 57,
+        "total_cases_3m": 171
+      },
+      "PNR contradictorio - Super - Flex": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 53,
+        "total_cases_3m": 161
+      },
+      "BCRA": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 53,
+        "total_cases_3m": 161
+      },
+      "Low Cost -  Fresh": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 51,
+        "total_cases_3m": 154
+      },
+      "PDD Verdi - Atenci¾n CS": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 51,
+        "total_cases_3m": 153
+      },
+      "FBM - Features - CBT": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 51,
+        "total_cases_3m": 153
+      },
+      "FBM - Inventario - Masivo": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 51,
+        "total_cases_3m": 153
+      },
+      "RELAC - Portales externos": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 50,
+        "total_cases_3m": 150
+      },
+      "E2C_Regulacion_ML": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 49,
+        "total_cases_3m": 148
+      },
+      "Asignaci¾n del Contßctanos FBM": {
+        "commerce_groups": [
+          "FBM Sellers"
+        ],
+        "avg_monthly_cases": 46,
+        "total_cases_3m": 138
+      },
+      "PNR - Default - Mediaciones": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 43,
+        "total_cases_3m": 131
+      },
+      "Asignaci¾n del Contßctanos PNRME": {
+        "commerce_groups": [
+          "PDD",
+          "PNR"
+        ],
+        "avg_monthly_cases": 80,
+        "total_cases_3m": 130
+      },
+      "Asignaci¾n del Contßctanos PNRMP": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 42,
+        "total_cases_3m": 128
+      },
+      "Suspensiones ME": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 42,
+        "total_cases_3m": 128
+      },
+      "Post Compra Funcionalidades Comprador": {
+        "commerce_groups": [
+          "Generales Compra"
+        ],
+        "avg_monthly_cases": 40,
+        "total_cases_3m": 121
+      },
+      "Arrepentimiento - Super - Flex": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 36,
+        "total_cases_3m": 110
+      }
+    },
+    "TIPIFICACION": {
+      "DEFECTIVE_ITEM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 307848,
+        "total_cases_3m": 923545
+      },
+      "REPENTANT_BUYER": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 256556,
+        "total_cases_3m": 769669
+      },
+      "PNR": {
+        "commerce_groups": [
+          "PNR"
+        ],
+        "avg_monthly_cases": 213908,
+        "total_cases_3m": 641724
+      },
+      "DIFFERENT_ITEM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 169331,
+        "total_cases_3m": 507993
+      },
+      "INCOMPLETE_ITEM": {
+        "commerce_groups": [
+          "PDD"
+        ],
+        "avg_monthly_cases": 162549,
+        "total_cases_3m": 487648
+      }
+    }
+  }
+}

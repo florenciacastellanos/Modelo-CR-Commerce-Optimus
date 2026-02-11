@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis CR - {{COMMERCE_GROUP}} - {{SITE}}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #fff159;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+        }
+        .metadata {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .summary {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .summary-card {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3483fa;
+        }
+        .summary-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .summary-card p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th {
+            background-color: #3483fa;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        tr:hover {
+            background-color: #f8f8f8;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .positive {
+            color: #00a650;
+            font-weight: bold;
+        }
+        .negative {
+            color: #f23d4f;
+            font-weight: bold;
+        }
+        .neutral {
+            color: #666;
+        }
+        .footer {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 30px;
+            padding: 20px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 14px 0;
+        }
+        .tab-btn {
+            border: 1px solid #e0e0e0;
+            background: white;
+            color: #333;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            border-color: #3483fa;
+            box-shadow: 0 1px 0 rgba(52,131,250,0.25);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Análisis de Contact Rate</h1>
+        <div class="metadata">
+            <strong>Commerce Group:</strong> {{COMMERCE_GROUP}} | 
+            <strong>Site:</strong> {{SITE}} | 
+            <strong>Dimensión:</strong> {{DIMENSION}}<br>
+            <strong>Períodos:</strong> {{PERIOD1}} vs {{PERIOD2}} | 
+            <strong>Generado:</strong> {{TIMESTAMP}}
+        </div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Reporte">
+        <button class="tab-btn active" id="tabBtn1" type="button" onclick="openTab('tab1')" role="tab" aria-selected="true">
+            {{TAB1_TITLE}}
+        </button>
+        <button class="tab-btn" id="tabBtn2" type="button" onclick="openTab('tab2')" role="tab" aria-selected="false" style="{{TAB2_STYLE}}">
+            {{TAB2_TITLE}}
+        </button>
+    </div>
+
+    <div id="tab1" class="tab-panel active" role="tabpanel" aria-labelledby="tabBtn1">
+        <div class="summary">
+            <h2 style="margin-top: 0;">📈 Resumen Ejecutivo</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Total {{PERIOD1}}</h3>
+                    <p>{{TOTAL_PERIOD1}}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total {{PERIOD2}}</h3>
+                    <p>{{TOTAL_PERIOD2}}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Variación Absoluta</h3>
+                    <p class="{{VAR_CLASS}}">{{TOTAL_VARIATION}}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Variación %</h3>
+                    <p class="{{VAR_CLASS}}">{{TOTAL_VARIATION_PCT}}%</p>
+                </div>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>{{DIMENSION}}</th>
+                    <th>Incoming {{PERIOD1}}</th>
+                    <th>Incoming {{PERIOD2}}</th>
+                    <th>Variación Abs</th>
+                    <th>Variación %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{TABLE_ROWS}}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="tab2" class="tab-panel" role="tabpanel" aria-labelledby="tabBtn2" style="{{TAB2_STYLE}}">
+        {{TAB2_CONTENT}}
+    </div>
+    
+    <div class="footer">
+        <p>Contact Rate Analysis Repository | Mercado Libre</p>
+        <p>Generado automáticamente por el framework de análisis de CR</p>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            var tab1 = document.getElementById('tab1');
+            var tab2 = document.getElementById('tab2');
+            var btn1 = document.getElementById('tabBtn1');
+            var btn2 = document.getElementById('tabBtn2');
+
+            tab1.classList.remove('active');
+            tab2.classList.remove('active');
+            btn1.classList.remove('active');
+            btn2.classList.remove('active');
+
+            if (tabId === 'tab1') {
+                tab1.classList.add('active');
+                btn1.classList.add('active');
+                btn1.setAttribute('aria-selected', 'true');
+                btn2.setAttribute('aria-selected', 'false');
+            } else {
+                tab2.classList.add('active');
+                btn2.classList.add('active');
+                btn1.setAttribute('aria-selected', 'false');
+                btn2.setAttribute('aria-selected', 'true');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+-- FASE 3.1: PEAK DETECTION - Generales Compra MLA
+-- Como CR MEJORÓ (bajó), buscamos peaks en P1 (Dic 2025) que expliquen la mejora
+
+WITH CLASIFICACION AS (
+    SELECT 
+        CAST(C.CONTACT_DATE_ID AS DATE) AS FECHA,
+        C.CAS_CASE_ID,
+        CASE
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PDD%') THEN 'PDD'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING = 'Conflict Others' THEN 'PDD'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PNR%') THEN 'PNR'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING = 'Conflict Stale' THEN 'PNR'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Others%') THEN 'PDD'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Mercado Envíos%') 
+                 AND C.PROCESS_GROUP_ECOMMERCE IN ('Comprador') THEN 'ME Distribución'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Post Compra Comprador%') 
+                 AND C.PROCESS_BU_CR_REPORTING IN ('ME') THEN 'ME Distribución'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Mercado Envíos%') 
+                 AND C.PROCESS_GROUP_ECOMMERCE IN ('Vendedor') THEN 'ME PreDespacho'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('Post Compra Funcionalidades Vendedor') 
+                 AND C.PROCESS_BU_CR_REPORTING IN ('ME') THEN 'ME PreDespacho'
+            WHEN C.PROCESS_GROUP_ECOMMERCE IN ('Driver', 'Drivers') THEN 'ME Drivers'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%FBM Sellers%') THEN 'FBM Sellers'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PreVenta%') THEN 'Pre Venta'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PostVenta%') THEN 'Post Venta'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Redes%') THEN 'Generales Compra'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Prustomer%') THEN 'Moderaciones'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Post Compra%') THEN 'Generales Compra'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Compra%') THEN 'Generales Compra'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Pagos%') THEN 'Pagos'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%MP Payer%') THEN 'MP On'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%MP On%') THEN 'MP On'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Seguridad 360%') THEN 'Cuenta'
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%Experiencia Impositiva%') THEN 'Experiencia Impositiva'
+            ELSE 'Generales Compra'
+        END AS AGRUP_COMMERCE
+    FROM `meli-bi-data.WHOWNER.BT_CX_CONTACTS` C
+    WHERE 
+        CAST(C.CONTACT_DATE_ID AS DATE) BETWEEN '2025-12-01' AND '2026-01-31'
+        AND C.SIT_SITE_ID = 'MLA'
+        AND C.PROCESS_ID NOT IN (1312)
+        AND C.PROCESS_BU_CR_REPORTING IN ('ME', 'ML')
+        AND C.QUEUE_ID NOT IN (2131, 230, 1102, 1241, 2075, 2294, 2295)
+        AND COALESCE(C.CI_REASON_ID, 0) NOT IN (2592, 6588, 10068, 2701, 10048)
+        AND C.FLAG_EXCLUDE_NUMERATOR_CR = 0
+),
+DIARIO AS (
+    SELECT 
+        FECHA,
+        FORMAT_DATE('%Y-%m', FECHA) AS MES,
+        COUNT(DISTINCT CAS_CASE_ID) AS CASOS
+    FROM CLASIFICACION
+    WHERE AGRUP_COMMERCE = 'Generales Compra'
+    GROUP BY FECHA
+),
+STATS_POR_MES AS (
+    SELECT 
+        MES,
+        AVG(CASOS) AS PROMEDIO,
+        STDDEV(CASOS) AS DESV_STD
+    FROM DIARIO
+    GROUP BY MES
+)
+SELECT 
+    d.FECHA,
+    d.MES,
+    d.CASOS,
+    ROUND(s.PROMEDIO, 0) AS PROMEDIO,
+    ROUND(s.PROMEDIO + 1.5 * s.DESV_STD, 0) AS UMBRAL_PICO,
+    CASE 
+        WHEN d.CASOS > (s.PROMEDIO + 1.5 * s.DESV_STD) THEN 'PICO'
+        WHEN d.CASOS < (s.PROMEDIO - 1.5 * s.DESV_STD) THEN 'VALLE'
+        ELSE 'NORMAL'
+    END AS CLASIFICACION
+FROM DIARIO d
+JOIN STATS_POR_MES s ON d.MES = s.MES
+ORDER BY d.FECHA

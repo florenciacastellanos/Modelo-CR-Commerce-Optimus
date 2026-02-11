@@ -1,0 +1,29 @@
+/* BACKUP CSS ORIGINAL - 6 Feb 2026 */
+/* Guardar para revertir si es necesario */
+
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; color: #2c3e50; line-height: 1.6; }}
+        .container {{ max-width: 1600px; margin: 0 auto; padding: 20px; }}
+        
+        .header {{ background: linear-gradient(135deg, {color_config['primary']} 0%, {color_config['badge']} 100%); color: white; padding: 35px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }}
+        .header h1 {{ font-size: 36px; margin-bottom: 10px; font-weight: 700; }}
+        .header .subtitle {{ font-size: 16px; opacity: 0.95; margin-top: 10px; }}
+        
+        .cards-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 30px; }}
+        .card {{ background: white; padding: 22px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); border-top: 4px solid #3498db; }}
+        .card.negative {{ border-top-color: #e74c3c; }}
+        .card.positive {{ border-top-color: #2ecc71; }}
+        .card-label {{ font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; font-weight: 600; }}
+        .card-value {{ font-size: 30px; font-weight: 800; color: #2c3e50; line-height: 1.2; }}
+        .card-change {{ font-size: 14px; margin-top: 10px; font-weight: 600; }}
+        .card-change.positive {{ color: #2ecc71; }}
+        .card-change.negative {{ color: #e74c3c; }}
+        
+        .section {{ background: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }}
+        .section h2 {{ color: #2c3e50; margin-bottom: 25px; font-size: 26px; padding-bottom: 15px; border-bottom: 3px solid #ecf0f1; font-weight: 700; }}
+        .section h3 {{ color: #34495e; margin: 25px 0 18px 0; font-size: 20px; font-weight: 600; }}
+        
+        thead {{ background: #34495e; color: white; }}
+
+/* ... resto del CSS original guardado para referencia ... */

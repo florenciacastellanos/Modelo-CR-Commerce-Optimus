@@ -1,0 +1,143 @@
+{
+  "version": "1.0",
+  "descripcion": "Biblioteca de sinónimos aprendidos automáticamente. Se actualiza cada vez que el sistema detecta nuevas similitudes.",
+  "ultima_actualizacion": "2026-02-08T22:05:49.237738",
+  "confirmados": {
+    "auto_20260206_011502": {
+      "nombre_canonico": "Producto recibido incompleto o diferente al comprado",
+      "variantes": [
+        "Producto recibido incompleto o diferente",
+        "Producto recibido incompleto o diferente al comprado"
+      ],
+      "auto_detectado": true,
+      "score_original": 0.87
+    },
+    "auto_20260206_012105": {
+      "nombre_canonico": "Entrega a terceros sin notificación al comprador",
+      "variantes": [
+        "Entrega a terceros sin confirmación del comprador",
+        "Entrega a terceros sin notificación al comprador"
+      ],
+      "auto_detectado": true,
+      "score_original": 0.887
+    },
+    "auto_20260206_111245": {
+      "nombre_canonico": "Dimensões incorretas nos anúncios necessitando ajuste",
+      "variantes": [
+        "Dimensões incorretas necessitando ajuste",
+        "Dimensões incorretas nos anúncios necessitando ajuste"
+      ],
+      "auto_detectado": true,
+      "score_original": 0.86
+    },
+    "auto_20260206_122155": {
+      "nombre_canonico": "Devolución no llega en plazo estipulado",
+      "variantes": [
+        "Devolución no llega en plazo estipulado",
+        "Devolución no llega en plazo estipulado"
+      ],
+      "auto_detectado": true,
+      "score_original": 1.0
+    },
+    "auto_20260206_122156": {
+      "nombre_canonico": "Dimensiones incorrectas generan sobrecobro de envío",
+      "variantes": [
+        "Dimensiones incorrectas generan sobrecobro de envío",
+        "Dimensiones incorrectas generan sobrecobro de envío"
+      ],
+      "auto_detectado": true,
+      "score_original": 1.0
+    },
+    "auto_20260208_220548": {
+      "nombre_canonico": "Falta de envio de documentação no prazo de 30 dias",
+      "variantes": [
+        "Falta de envio de documentação no prazo de 30 dias",
+        "Falta de envio de documentação no prazo de 30 dias"
+      ],
+      "auto_detectado": true,
+      "score_original": 1.0
+    },
+    "auto_20260208_220549": {
+      "nombre_canonico": "Produto compatível confundido como falsificação",
+      "variantes": [
+        "Produto compatível confundido como falsificação",
+        "Produto compatível confundido como falsificação"
+      ],
+      "auto_detectado": true,
+      "score_original": 1.0
+    }
+  },
+  "pendientes": [
+    {
+      "causas": [
+        "Dúvidas sobre taxas e custos",
+        "Dúvidas sobre taxas e valores do Flex"
+      ],
+      "score": 0.738,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.186203",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Problemas de envio, tracking e entrega CBT",
+        "Problemas de escaneamento e tracking da Cainiao"
+      ],
+      "score": 0.659,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.250551",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Coletas não realizadas pelo transportador",
+        "Coletas não realizadas ou canceladas"
+      ],
+      "score": 0.701,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.325787",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Problemas de configuração e endereço",
+        "Problemas de endereço e configuração de coleta"
+      ],
+      "score": 0.707,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.350427",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Remoção de impacto e proteção de reputação",
+        "Remoção de impacto na reputação"
+      ],
+      "score": 0.795,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.394026",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Problemas com geração e impressão de etiquetas",
+        "Problemas de formato e impressão"
+      ],
+      "score": 0.667,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T11:12:45.564103",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Cobros incorrectos de envío y comisiones",
+        "Cobros incorrectos reales de envío"
+      ],
+      "score": 0.73,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-06T12:21:56.773079",
+      "confirmado": false
+    }
+  ],
+  "rechazados": []
+}
