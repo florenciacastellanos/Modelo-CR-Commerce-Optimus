@@ -338,13 +338,20 @@ WHERE SITE_ID {site_filter}
                                 'filter_by_site': True,
                                 'site_filter_type': 'warehouse_prefix',
                                 'sites_disponibles': ['MLA', 'MLB', 'MLC', 'MCO', 'MLM'],
+                                'numerador_filtro': {
+                                    'campo': 'PROCESS_ID',
+                                    'condicion': 'IN (615, 1981, 2418)',
+                                    'descripcion': 'El incoming (numerador) debe filtrarse solo por estos Process IDs al usar este driver alternativo'
+                                },
                                 'notas': (
                                     'Útil para calcular el CR sobre el volumen real de '
                                     'operaciones de inbound (recepciones), en lugar de '
                                     'órdenes con FBM. El site se deriva del prefijo del '
                                     'warehouse_id (AR=MLA, BR=MLB, MX=MLM, CO=MCO, CL=MLC). '
                                     'Excluye: transfers, warehouses TW/TR, merchants CBT, '
-                                    'removals (INB_FLAG_REMOVAL=0).'
+                                    'removals (INB_FLAG_REMOVAL=0). '
+                                    'IMPORTANTE: El numerador (incoming) debe filtrarse por '
+                                    'PROCESS_ID IN (615, 1981, 2418).'
                                 ),
 
                                 # ────────────────────────────────────────────
@@ -457,7 +464,533 @@ GROUP BY 1, 4, 5, 6, 7, 8, 9
                 }  # fin cdus de _TODOS
             },
 
+            # ────────────────────────────────────────────────────────────────
+            # PROCESO: FBM-Retiro de Stock
+            # ────────────────────────────────────────────────────────────────
+            'FBM-Retiro de Stock': {
+                'cdus': {
+
+                    # ════════════════════════════════════════════════════════
+                    # CDU: _TODOS (aplica a todos los CDUs de Retiro de Stock)
+                    # ════════════════════════════════════════════════════════
+                    '_TODOS': {
+                        'descripcion': 'Aplica a todos los CDUs de FBM-Retiro de Stock',
+                        'alternativas': {
+
+                            'retiro_requests': {
+                                'label': 'Requests de Retiro de Stock',
+                                'description': (
+                                    'Total de requests de retiro de stock únicos (FBM_WIT_REQUEST_ID) '
+                                    'realizados en el período. Cada request se deduplica tomando la '
+                                    'primera fecha de creación. Excluye warehouses TW/TR. Permite '
+                                    'calcular el CR sobre el volumen real de operaciones de retiro '
+                                    'de stock en FBM, en lugar de órdenes con FBM.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2',
+                                'tabla_join_segmento': 'meli-bi-data.EXPLOTACION.SEGMENTO',
+                                'tabla_join_sugeridos': 'meli-bi-data.WHOWNER.DM_SUGGESTION_KVS_DATA',
+                                'fecha_field': 'FBM_WIT_DATE_CREATED',
+                                'count_expression': 'COUNT(DISTINCT FBM_WIT_REQUEST_ID)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLM', 'MCO', 'MLC'],
+                                'notas': (
+                                    'Útil para calcular el CR sobre el volumen real de '
+                                    'operaciones de retiro de stock (withdrawal requests), '
+                                    'en lugar de órdenes con FBM. El site se filtra directamente '
+                                    'por SIT_SITE_ID. Excluye: warehouses TW/TR. Se deduplica '
+                                    'por FBM_WIT_REQUEST_ID tomando la primera fecha de creación.'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'warehouse_id': "NOT LIKE '%TW%' AND NOT LIKE '%TR%'",
+                                    'deduplicacion': 'QUALIFY ROW_NUMBER() OVER(PARTITION BY FBM_WIT_REQUEST_ID ORDER BY FBM_WIT_DATE_CREATED ASC) = 1',
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de requests P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+WITH base AS (
+    SELECT
+        a.SIT_SITE_ID,
+        a.FBM_WIT_REQUEST_ID,
+        CAST(a.FBM_WIT_DATE_CREATED AS DATE) AS DATE_CREATED
+    FROM `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2` a
+    WHERE CAST(a.FBM_WIT_DATE_CREATED AS DATE) BETWEEN '{p1_start}' AND '{p2_end}'
+        AND a.warehouse_id NOT LIKE '%TR%'
+        AND a.warehouse_id NOT LIKE '%TW%'
+    QUALIFY ROW_NUMBER() OVER(PARTITION BY a.FBM_WIT_REQUEST_ID ORDER BY a.FBM_WIT_DATE_CREATED ASC) = 1
+)
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN DATE_CREATED BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN FBM_WIT_REQUEST_ID
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN DATE_CREATED BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN FBM_WIT_REQUEST_ID
+    END) AS DRV_P2
+FROM base
+WHERE SIT_SITE_ID {site_filter}
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Para gráfico de tendencia
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+WITH base AS (
+    SELECT
+        a.SIT_SITE_ID,
+        a.FBM_WIT_REQUEST_ID,
+        CAST(a.FBM_WIT_DATE_CREATED AS DATE) AS DATE_CREATED
+    FROM `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2` a
+    WHERE CAST(a.FBM_WIT_DATE_CREATED AS DATE) BETWEEN DATE_SUB('{p2_end}', INTERVAL 25 WEEK) AND '{p2_end}'
+        AND a.warehouse_id NOT LIKE '%TR%'
+        AND a.warehouse_id NOT LIKE '%TW%'
+    QUALIFY ROW_NUMBER() OVER(PARTITION BY a.FBM_WIT_REQUEST_ID ORDER BY a.FBM_WIT_DATE_CREATED ASC) = 1
+)
+SELECT
+    DATE_TRUNC(DATE_CREATED, WEEK(MONDAY)) AS SEMANA,
+    COUNT(DISTINCT FBM_WIT_REQUEST_ID) AS DRIVER
+FROM base
+WHERE SIT_SITE_ID {site_filter}
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Con clasificaciones completas
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+WITH
+predata2 AS (
+    SELECT DISTINCT
+        a.fbm_wit_request_id,
+        p.segmento
+    FROM `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2` a
+    LEFT JOIN `meli-bi-data.EXPLOTACION.SEGMENTO` p
+        ON a.cus_cust_id_sel = p.cus_cust_id_sel
+),
+CONFIRMED AS (
+    SELECT DISTINCT
+        CAST(LEFT(DATE_TAKE, 10) AS DATE) AS DATE_CREATED,
+        SELLER_ID, SITE_ID, STATUS, V.TYPE, V.VALUE
+    FROM `meli-bi-data.WHOWNER.DM_SUGGESTION_KVS_DATA`, UNNEST(VALUES) AS V
+    WHERE V.TYPE = 'withdrawal_id'
+        AND STATUS = 'CONFIRMED'
+),
+sugerido AS (
+    SELECT DISTINCT
+        fbm_wit_request_id,
+        CASE
+            WHEN CAST(fbm_wit_request_id AS STRING) IN (SELECT CAST(value AS STRING) FROM CONFIRMED)
+            THEN 1 ELSE 0
+        END AS flag_sugerido
+    FROM `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2`
+)
+SELECT
+    SIT_SITE_ID AS SITE,
+    FORMAT_DATE('%Y%m', DATE_CREATED) AS MES_RETIRO,
+    CONCAT(FORMAT_DATE('%y', DATE_CREATED), 'Q', EXTRACT(QUARTER FROM DATE_CREATED)) AS QUARTER_RETIRO,
+    CONCAT(FORMAT_DATE('%y', DATE_CREATED), 'Q', EXTRACT(QUARTER FROM DATE_CREATED), '%%WK', EXTRACT(WEEK FROM DATE_CREATED)) AS SEMANA_RETIRO,
+    FBM_SHIPMENT_TYPE AS TIPO_LOGISTICO2,
+    SEGMENTO,
+    CASE WHEN SUM_TRANSFER > 0 THEN 'TRANSFER' ELSE FBM_SHIPMENT_TYPE END AS TIPO_LOGISTICO,
+    flag_sugerido,
+    COUNT(FBM_WIT_REQUEST_ID) AS REQUEST
+FROM (
+    SELECT
+        a.SIT_SITE_ID,
+        a.FBM_SHIPMENT_TYPE,
+        a.FBM_WIT_REQUEST_ID,
+        r.segmento,
+        s.flag_sugerido,
+        CAST(a.FBM_WIT_DATE_CREATED AS DATE) AS DATE_CREATED,
+        SUM(CASE WHEN FBM_SHIPMENT_TYPE = 'TRANSFER' THEN 1 ELSE 0 END) OVER(PARTITION BY a.FBM_WIT_REQUEST_ID) AS SUM_TRANSFER
+    FROM `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2` a
+    LEFT JOIN predata2 r ON a.fbm_wit_request_id = r.fbm_wit_request_id
+    LEFT JOIN sugerido s ON a.fbm_wit_request_id = s.fbm_wit_request_id
+    WHERE CAST(a.FBM_WIT_DATE_CREATED AS DATE) BETWEEN '{p1_start}' AND '{p2_end}'
+        AND a.warehouse_id NOT LIKE '%TR%'
+        AND a.warehouse_id NOT LIKE '%TW%'
+        AND a.SIT_SITE_ID {site_filter}
+    QUALIFY ROW_NUMBER() OVER(PARTITION BY a.FBM_WIT_REQUEST_ID ORDER BY a.FBM_WIT_DATE_CREATED ASC) = 1
+)
+GROUP BY ALL
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {
+                                    'TIPO_LOGISTICO': {
+                                        'label': 'Tipo Logístico (con transfers)',
+                                        'valores': ['TRANSFER', 'CROSS_DOCKING', 'SAME_WAREHOUSE', 'DROP_OFF']
+                                    },
+                                    'TIPO_LOGISTICO2': {
+                                        'label': 'Tipo Logístico Original',
+                                        'valores': []
+                                    },
+                                    'SEGMENTO': {
+                                        'label': 'Segmento del Seller',
+                                        'valores': []
+                                    },
+                                    'flag_sugerido': {
+                                        'label': 'Retiro Sugerido',
+                                        'valores': [0, 1]
+                                    }
+                                }
+                            },
+
+                            'sellers_con_stock': {
+                                'label': 'Sellers con Stock',
+                                'description': (
+                                    'Total de sellers únicos (CUS_CUST_ID) que tienen stock mayor a 0 '
+                                    'en el período. Solo considera sellers 3P y CBT. Permite calcular '
+                                    'el CR sobre la base real de sellers con inventario activo en FBM, '
+                                    'en lugar de órdenes con FBM.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.WHOWNER.DM_SHP_FBM_STOCK_QUALITY',
+                                'tabla_join': 'meli-bi-data.WHOWNER.LK_CUS_CBT_ITEM_ORIGIN',
+                                'fecha_field': 'CALENDAR_DATE',
+                                'count_expression': 'COUNT(DISTINCT S.CUS_CUST_ID)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLM', 'MCO', 'MLC'],
+                                'notas': (
+                                    'Útil para calcular el CR sobre la base de sellers con '
+                                    'inventario activo (stock > 0) en FBM, en lugar de órdenes. '
+                                    'Solo incluye sellers 3P y CBT (CUS_SALES_INITIATIVE). '
+                                    'Permite evaluar cuántos contactos genera cada seller con stock, '
+                                    'lo cual es más representativo para el proceso de Retiro de Stock.'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'CUS_SALES_INITIATIVE': "LIKE '%3P%' OR LIKE '%CBT%'",
+                                    'SKU_TOTAL_STOCK': '> 0',
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de sellers P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN CAST(S.CALENDAR_DATE AS DATE) BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN S.CUS_CUST_ID
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN CAST(S.CALENDAR_DATE AS DATE) BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN S.CUS_CUST_ID
+    END) AS DRV_P2
+FROM `meli-bi-data.WHOWNER.DM_SHP_FBM_STOCK_QUALITY` S
+LEFT JOIN `meli-bi-data.WHOWNER.LK_CUS_CBT_ITEM_ORIGIN` I
+    ON S.CUS_CUST_ID = I.CUS_CUST_ID
+WHERE CAST(S.CALENDAR_DATE AS DATE) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND (S.CUS_SALES_INITIATIVE LIKE '%3P%' OR S.CUS_SALES_INITIATIVE LIKE '%CBT%')
+    AND S.SKU_TOTAL_STOCK > 0
+    AND S.SIT_SITE_ID {site_filter}
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Para gráfico de tendencia
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+SELECT
+    DATE_TRUNC(CAST(S.CALENDAR_DATE AS DATE), WEEK(MONDAY)) AS SEMANA,
+    COUNT(DISTINCT S.CUS_CUST_ID) AS DRIVER
+FROM `meli-bi-data.WHOWNER.DM_SHP_FBM_STOCK_QUALITY` S
+LEFT JOIN `meli-bi-data.WHOWNER.LK_CUS_CBT_ITEM_ORIGIN` I
+    ON S.CUS_CUST_ID = I.CUS_CUST_ID
+WHERE CAST(S.CALENDAR_DATE AS DATE) BETWEEN DATE_SUB('{p2_end}', INTERVAL 25 WEEK) AND '{p2_end}'
+    AND (S.CUS_SALES_INITIATIVE LIKE '%3P%' OR S.CUS_SALES_INITIATIVE LIKE '%CBT%')
+    AND S.SKU_TOTAL_STOCK > 0
+    AND S.SIT_SITE_ID {site_filter}
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Con clasificaciones completas
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+SELECT
+    CAST(S.CALENDAR_DATE AS DATE) AS FECHA,
+    FORMAT_DATE('%%Y', S.CALENDAR_DATE) AS YEAR,
+    EXTRACT(MONTH FROM S.CALENDAR_DATE) AS MONTH,
+    EXTRACT(WEEK FROM S.CALENDAR_DATE) AS SEMANA,
+    S.SIT_SITE_ID AS SITE,
+    CASE WHEN I.ITE_CBT_ORIGIN IS NULL THEN 'local' ELSE I.ITE_CBT_ORIGIN END AS ORIGEN,
+    CASE
+        WHEN S.CUS_SALES_INITIATIVE LIKE '%3P%' THEN '3P'
+        WHEN S.CUS_SALES_INITIATIVE LIKE '%CBT%' THEN 'CBT'
+    END AS TYPE_SELLER,
+    COUNT(DISTINCT S.CUS_CUST_ID) AS SELLERS_CON_STOCK
+FROM `meli-bi-data.WHOWNER.DM_SHP_FBM_STOCK_QUALITY` S
+LEFT JOIN `meli-bi-data.WHOWNER.LK_CUS_CBT_ITEM_ORIGIN` I
+    ON S.CUS_CUST_ID = I.CUS_CUST_ID
+WHERE CAST(S.CALENDAR_DATE AS DATE) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND (S.CUS_SALES_INITIATIVE LIKE '%3P%' OR S.CUS_SALES_INITIATIVE LIKE '%CBT%')
+    AND S.SKU_TOTAL_STOCK > 0
+    AND S.SIT_SITE_ID {site_filter}
+GROUP BY ALL
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {
+                                    'ORIGEN': {
+                                        'label': 'Origen del Seller',
+                                        'valores': ['local'],
+                                        'detalle': 'Si ITE_CBT_ORIGIN es NULL se clasifica como local'
+                                    },
+                                    'TYPE_SELLER': {
+                                        'label': 'Tipo de Seller',
+                                        'valores': ['3P', 'CBT']
+                                    }
+                                }
+                            },
+
+                        }  # fin alternativas de _TODOS
+                    },
+
+                }  # fin cdus de FBM-Retiro de Stock
+            },
+
         }  # fin procesos de FBM Sellers
+    },
+
+    # ========================================================================
+    # MODERACIONES
+    # ========================================================================
+    'Moderaciones': {
+        'driver_estandar_ref': 'orders_by_site / COUNT(DISTINCT ORD.ORD_ORDER_ID)',
+        'procesos': {
+
+            # ────────────────────────────────────────────────────────────────
+            # PROCESO: _TODOS (aplica a todos los procesos de Moderaciones)
+            # ────────────────────────────────────────────────────────────────
+            '_TODOS': {
+                'descripcion': 'Aplica a todos los procesos de Moderaciones',
+                'cdus': {
+
+                    # ════════════════════════════════════════════════════════
+                    # CDU: _TODOS (aplica a todos los CDUs de Moderaciones)
+                    # ════════════════════════════════════════════════════════
+                    '_TODOS': {
+                        'descripcion': 'Aplica a todos los CDUs de Moderaciones',
+                        'alternativas': {
+
+                            'items_moderados': {
+                                'label': 'Items Moderados (Cantidad de mod_event_id)',
+                                'description': (
+                                    'Total de eventos de moderación únicos (mod_event_id) en el período. '
+                                    'Solo considera primera moderación (FLG_FIRST_MOD = true). '
+                                    'A más items moderados, más contactos potenciales en Moderaciones. '
+                                    'Un aumento en órdenes NO explica la variación de Moderaciones; '
+                                    'este driver refleja el volumen real de acciones de moderación.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_MODERATIONS',
+                                'fecha_field': 'MONTH_ID',
+                                'count_expression': 'COUNT(DISTINCT mod_event_id)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLM', 'MCO', 'MLC', 'MLU', 'MEC', 'MPE'],
+                                'notas': (
+                                    'Útil para calcular el CR de Moderaciones sobre el volumen real '
+                                    'de items moderados, en lugar de órdenes del site. Un aumento en '
+                                    'órdenes NO explica variaciones en Moderaciones; lo que las explica '
+                                    'es el volumen de items moderados. Solo se cuentan primeras '
+                                    'moderaciones (FLG_FIRST_MOD = true). Excluye MLV. '
+                                    'NOTA: MONTH_ID es campo de partición mensual, el gráfico de '
+                                    'tendencia es MENSUAL (no semanal).'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'FLG_FIRST_MOD': '= true (solo primera moderación)',
+                                    'SIT_SITE_ID': "<> 'MLV' (excluido siempre)",
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de moderaciones P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN MONTH_ID BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN mod_event_id
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN MONTH_ID BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN mod_event_id
+    END) AS DRV_P2
+FROM `meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_MODERATIONS`
+WHERE MONTH_ID BETWEEN '{p1_start}' AND '{p2_end}'
+    AND FLG_FIRST_MOD = true
+    AND SIT_SITE_ID {site_filter}
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Tendencia MENSUAL
+                                # (MONTH_ID es partición mensual)
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+SELECT
+    MONTH_ID AS SEMANA,
+    COUNT(DISTINCT mod_event_id) AS DRIVER
+FROM `meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_MODERATIONS`
+WHERE MONTH_ID BETWEEN DATE_SUB('{p2_end}', INTERVAL 12 MONTH) AND '{p2_end}'
+    AND FLG_FIRST_MOD = true
+    AND SIT_SITE_ID {site_filter}
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Con clasificaciones completas
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+SELECT
+    MONTH_ID,
+    SIT_SITE_ID,
+    FILTER_GROUP,
+    FLG_CBT,
+    CASE
+        WHEN FILTER_GROUP = 'PI' THEN 'PI'
+        WHEN FILTER_GROUP = 'DP' THEN 'DP'
+        WHEN FILTER_GROUP = 'AP' THEN 'AP'
+        WHEN FILTER_GROUP = 'TP' AND filter_name NOT IN ('NOT_CERTIFIED_QUALITY_THUMBNAIL','NOT_CERTIFIED_QUALITY_THUMBNAIL_ACTIVE','PG_POOR_QUALITY_PICTURE_AUTO','POOR_QUALITY_PICTURE','POOR_QUALITY_THUMBNAIL','POOR_QUALITY_THUMBNAIL_ACTIVE','WTF_POOR_QUALITY_THUMBNAIL','PICTURE_SIZE_ERROR','PICTURE_WATERMARK_ERROR','PICTURE_TEXT_OR_LOGO_ERROR','PICTURE_WATERMARK_VARIANT','PICTURE_SIZE_VARIANT','GOOD_QUALITY_THUMBNAIL','PICTURE_ILLUMINATION_VARIANT','PRESENTATION_VARIANT','SINGLE_UNIT_VARIANT','GENERAL_QUALITY_VARIANT','ILLUMINATION_VARIANT','COMBINED_QUALITY_VARIANT','CENTERED_PHOTO_VARIANT','TEST_GENERAL_QUALITY','TEST_SINGLE_UNIT','TEST_ILLUMINATION','TEST_POOR_TWO','TEST_POOR_THREE','TEST_POOR_ONE','FASHION_WRONG_GENDER_WFP_VARIATIONS','FASHION_WRONG_GENDER_WFP','CENTERED_PHOTO','TMP_FASHION_ADHOC_FONDOS','MINIMUM_SIZE','SINGLE_UNIT','PRESENTATION','TEXT_LOGO','WATERMARK','WHITE_BACKGROUND','PROFESSIONAL_PICTURE') THEN 'TP'
+        WHEN FILTER_GROUP = 'TP' AND filter_name IN ('NOT_CERTIFIED_QUALITY_THUMBNAIL','NOT_CERTIFIED_QUALITY_THUMBNAIL_ACTIVE','PG_POOR_QUALITY_PICTURE_AUTO','POOR_QUALITY_PICTURE','POOR_QUALITY_THUMBNAIL','POOR_QUALITY_THUMBNAIL_ACTIVE','WTF_POOR_QUALITY_THUMBNAIL','PICTURE_SIZE_ERROR','PICTURE_WATERMARK_ERROR','PICTURE_TEXT_OR_LOGO_ERROR','PICTURE_WATERMARK_VARIANT','PICTURE_SIZE_VARIANT','GOOD_QUALITY_THUMBNAIL','PICTURE_ILLUMINATION_VARIANT','PRESENTATION_VARIANT','SINGLE_UNIT_VARIANT','GENERAL_QUALITY_VARIANT','ILLUMINATION_VARIANT','COMBINED_QUALITY_VARIANT','CENTERED_PHOTO_VARIANT','TEST_GENERAL_QUALITY','TEST_SINGLE_UNIT','TEST_ILLUMINATION','TEST_POOR_TWO','TEST_POOR_THREE','TEST_POOR_ONE','FASHION_WRONG_GENDER_WFP_VARIATIONS','FASHION_WRONG_GENDER_WFP','CENTERED_PHOTO','TMP_FASHION_ADHOC_FONDOS','MINIMUM_SIZE','SINGLE_UNIT','PRESENTATION','TEXT_LOGO','WATERMARK','WHITE_BACKGROUND','PROFESSIONAL_PICTURE') THEN 'PQ'
+    END AS FILTER_GROUP_CX,
+    CASE
+        WHEN filter_name IN ('NOT_CERTIFIED_QUALITY_THUMBNAIL','NOT_CERTIFIED_QUALITY_THUMBNAIL_ACTIVE','PG_POOR_QUALITY_PICTURE_AUTO','POOR_QUALITY_PICTURE','POOR_QUALITY_THUMBNAIL','POOR_QUALITY_THUMBNAIL_ACTIVE','WTF_POOR_QUALITY_THUMBNAIL','PICTURE_SIZE_ERROR','PICTURE_WATERMARK_ERROR','PICTURE_TEXT_OR_LOGO_ERROR','PICTURE_WATERMARK_VARIANT','PICTURE_SIZE_VARIANT','GOOD_QUALITY_THUMBNAIL','PICTURE_ILLUMINATION_VARIANT','PRESENTATION_VARIANT','SINGLE_UNIT_VARIANT','GENERAL_QUALITY_VARIANT','ILLUMINATION_VARIANT','COMBINED_QUALITY_VARIANT','CENTERED_PHOTO_VARIANT','TEST_GENERAL_QUALITY','TEST_SINGLE_UNIT','TEST_ILLUMINATION','TEST_POOR_TWO','TEST_POOR_THREE','TEST_POOR_ONE','FASHION_WRONG_GENDER_WFP_VARIATIONS','FASHION_WRONG_GENDER_WFP','CENTERED_PHOTO','TMP_FASHION_ADHOC_FONDOS','MINIMUM_SIZE','SINGLE_UNIT','PRESENTATION','TEXT_LOGO','WATERMARK','WHITE_BACKGROUND','PROFESSIONAL_PICTURE') THEN 'Calidad de Foto'
+        WHEN FILTER_NAME IN ('DOMAIN_WRONG_CATEG_V2','DOMAIN_WRONG_CATEG_CBT_V2','DOMAIN_WRONG_CATEG','DOMAIN_WRONG_CATEG_CATALOGO','DOMAIN_WRONG_CATEG_CBT_PICTURE_V2','DOMAIN_WRONG_CATEG_VENTAS_V2','DOMAIN_WRONG_TITLE','MAL_CATEGORIZADO_CATEG','MAL_CATEGORIZADO_CLASIFICADOS_A_CORE','MAL_CATEGORIZADO_CORE_A_AUTOS','MAL_CATEGORIZADO_CORE_A_CORE','MAL_CATEGORIZADO_CORE_A_INMUEBLES','MAL_CATEGORIZADO_CORE_A_SERVICIOS','MAL_CATEGORIZADO_ESPECIALES_A_ESPECIALES','MAL_CATEGORIZADO_PRICE','ML_MAL_CATEGORIZADO_ALCOHOL_GEL','WTF_WRONG_CATEG','WTF_WRONG_CATEG_V2','WTF_WRONG_PRICE','WTF_WRONG_PRICE_CLASSI_BI_V2','MAL_CATEGORIZADO_CORE_A_CLASI_AUTO','FR_PORNOGRAFIA_MAL_CATEGORIZADA_AUTO_V2','PORNOGRAFIA_MAL_CATEGORIZADA_ADULTOS') THEN 'Mal Categorizado'
+        WHEN FILTER_NAME IN ('EXACT_DUPLICATE_CATALOG','EXACT_DUPLICATE_CORE_PRODUCTIZED','EXACT_DUPLICATE_CORE_PRODUCTIZED_WFP','EXACT_DUPLICATE_MOTORS_PLATES','EXACT_DUPLICATE_NO_TITLE','EXACT_DUPLICATE','EXACT_DUPLICATE_CBT','EXACT_DUPLICATE_CBT_WFP','EXACT_DUPLICATE_WFP','EXACT_DUPLICATE_RE','EXACT_DUPLICATE_MOTORS','EXACT_DUPLICATE_PRICE','EXACT_DUPLICATE_PRICE_WFP','EXACT_DUPLICATE_LEV','EXACT_DUPLICATE_CBT_PRICE','EXACT_DUPLICATE_CBT_PRICE_WFP','INVALID_PLATES','BS_EXACT_DUPLICATE','BS_EXACT_DUPLICATE_CBT','BS_EXACT_DUPLICATE_RE','BS_EXACT_DUPLICATE_WFP','TEST_CF_FORBIDDEN_OUT_OF_MKT','TEST_CF_PAUSED_OUT_OF_MKT','TEST_CF_FORBIDDEN_ELEMENT') THEN 'Duplicados'
+        WHEN FILTER_NAME IN ('MELI_LABEL','MELI_LABEL_OCR','OCR_GOO_MELI_LABEL_OCR','PG_BRAND_PICTURE_AUTO') THEN 'Labels'
+        WHEN FILTER_NAME IN ('BS_CLOSE_CLAIM_BY_SELLER_AUTO','BS_EVAS_CLAIM_BY_SELLER_AUTO','EVASION_CHOICE','EVASION_COMISIONES','EVASION_FISCAL_RECARGO','EVASION_OFERTAS_IRREGULARES','EVASION_OPERACIONES_IRREGULARES','EVASION_PRECIO','EVASION_RELATIVA_AL_PRECIO','EVASION_TEST_RESTRICCIONES','FF_SHIPPING_FISCAL_INFORMATION','FF_SHIPPING_FISCAL_RULE','FF_SHIPPING_TAX_PAYER_TYPE','FI_EVASION_AUTO','FI_EVASION_CONTROL','FR_EVAS_CANT_LLANTAS_AUTO','FR_EVAS_CANT_NEUMATICOS_AUTO','FR_EVASION_LINKS_AUTO','FR_EVASION_MIN_PRICE_AUTO','FR_EVASION_PRICE_AUTO','FR_EVASION_SHIPPING_AUTO','MERCADOENVIOS_RECARGO','ML_EVAF_GRAL_AUTO_T','ML_EVASION_AUTO','ML_EVASION_BULK_AUTO','ML_EVASION_RESERVA','ML_IPHONE_USADO_FSO_MLA','OPERACIONES_IRREGULARES_QR') THEN 'Evasion'
+        WHEN FILTER_NAME IN ('PG_PICTURE_OUT_TOPIC_AUTO','PG_PICTURE_OUT_TOPIC_LL_AUTO') THEN 'Out of Topic'
+        WHEN FILTER_NAME IN ('CONTENIDO_SENSIBLE_FOTOS','PG_CONTENIDO_SENSIBLE_FOTOS_AUTO','PG_CONTENIDO_SEXUAL_EXPLICITO_AUTO','CONTENIDO_SEXUAL_EXPLICITO','CONTENIDO_SENSIBLE_NICKNAMES','CONT_SENSIBLE_SEXUAL','PORNOGRAFIA_MAL_CATEGORIZADA_ADULTOS','CONTENIDO_SENSIBLE_EXTREMO') THEN 'Contenido Sensible'
+        ELSE 'Otros TP'
+    END AS FILTER_GROUP_CX3,
+    FILTER_NAME,
+    COUNT(DISTINCT mod_event_id) AS MODERACIONES
+FROM `meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_MODERATIONS`
+WHERE MONTH_ID BETWEEN '{p1_start}' AND '{p2_end}'
+    AND FLG_FIRST_MOD = true
+    AND SIT_SITE_ID {site_filter}
+GROUP BY ALL
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {
+                                    'FILTER_GROUP': {
+                                        'label': 'Grupo de Filtro (original)',
+                                        'valores': ['PI', 'DP', 'AP', 'TP']
+                                    },
+                                    'FILTER_GROUP_CX': {
+                                        'label': 'Grupo de Filtro CX (separa PQ de TP)',
+                                        'valores': ['PI', 'DP', 'AP', 'TP', 'PQ'],
+                                        'detalle': {
+                                            'PI': 'Propiedad Intelectual',
+                                            'DP': 'Datos Personales',
+                                            'AP': 'Artículos Prohibidos',
+                                            'TP': 'Técnica Prohibida (sin calidad de foto)',
+                                            'PQ': 'Calidad de Foto (subconjunto de TP)'
+                                        }
+                                    },
+                                    'FILTER_GROUP_CX3': {
+                                        'label': 'Sub-agrupación de filtros (granular)',
+                                        'valores': [
+                                            'Calidad de Foto',
+                                            'Mal Categorizado',
+                                            'Duplicados',
+                                            'Labels',
+                                            'Evasion',
+                                            'Out of Topic',
+                                            'Contenido Sensible',
+                                            'Otros TP'
+                                        ]
+                                    },
+                                    'FLG_CBT': {
+                                        'label': 'Flag Cross-Border Trade',
+                                        'valores': []
+                                    },
+                                    'FILTER_NAME': {
+                                        'label': 'Nombre de Filtro (detalle individual)',
+                                        'valores': []
+                                    }
+                                },
+
+                                # ────────────────────────────────────────────
+                                # INCOMING ALTERNATIVO: Contactos asociados
+                                # a cada filtro de moderación. Permite
+                                # correlacionar incoming con variaciones del
+                                # driver. NO reemplaza el incoming estándar.
+                                # ────────────────────────────────────────────
+                                'incoming_alternativo': {
+                                    'label': 'Incoming por Filtro de Moderación',
+                                    'description': (
+                                        'Contactos (CAS_CASE_ID) asociados a cada filtro/proceso '
+                                        'de moderación. Permite correlacionar el incoming con las '
+                                        'variaciones del driver de items moderados. '
+                                        'NO reemplaza el incoming estándar del CR.'
+                                    ),
+                                    'tabla_fuente': 'meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_CX_CONTACTS_MODS',
+                                    'tabla_join': 'meli-bi-data.WHOWNER.BT_CX_CONTACTS',
+                                    'query': """
+SELECT
+    mod.MONTH_ID,
+    mod.SIT_SITE_ID,
+    mod.PROCESS_NAME,
+    mod.CDU_RBK,
+    mod.SOLUTION_NAME,
+    mod.FILTER_NAME,
+    mod.filter_group,
+    mod.FILTER_GROUP_AJUSTADO,
+    mod.FLG_CBT,
+    CASE
+        WHEN mod.FILTER_GROUP_AJUSTADO = 'PI' OR (mod.FILTER_NAME IS NULL AND mod.PROCESS_NAME = 'PR - Propiedad intelectual') THEN 'PI'
+        WHEN mod.FILTER_GROUP_AJUSTADO = 'DP' OR (mod.FILTER_NAME IS NULL AND mod.PROCESS_NAME = 'PR - PR - Datos Personales') THEN 'DP'
+        WHEN mod.FILTER_GROUP_AJUSTADO = 'AP' OR (mod.FILTER_NAME IS NULL AND mod.PROCESS_NAME = 'PR - ArtÍculos prohibidos') THEN 'AP'
+        WHEN mod.filter_name IN ('ILLUMINATION','PRESENTATION','SINGLE_UNIT','GENERAL_QUALITY','CENTERED_PHOTO','CORRECT_POSE','PROTAGONIST_PRODUCT','COMPLETE_PRODUCT','CORRECT_BACKGROUND','PROFESSIONAL_PICTURE','WHITE_ BACKGROUND','MINIMUM_SIZE','TEXT_LOGO','WATERMARK','NOT_CERTIFIED_QUALITY_THUMBNAIL','NOT_CERTIFIED_QUALITY_THUMBNAIL_ACTIVE','PG_POOR_QUALITY_PICTURE_AUTO','POOR_QUALITY_PICTURE','POOR_QUALITY_THUMBNAIL','POOR_QUALITY_THUMBNAIL_ACTIVE','WTF_POOR_QUALITY_THUMBNAIL','PICTURE_SIZE_ERROR','PICTURE_WATERMARK_ERROR','PICTURE_TEXT_OR_LOGO_ERROR','PICTURE_WATERMARK_VARIANT','PICTURE_SIZE_VARIANT','GOOD_QUALITY_THUMBNAIL','PICTURE_ILLUMINATION_VARIANT','PRESENTATION_VARIANT','SINGLE_UNIT_VARIANT','GENERAL_QUALITY_VARIANT','ILLUMINATION_VARIANT','COMBINED_QUALITY_VARIANT','CENTERED_PHOTO_VARIANT','TEST_GENERAL_QUALITY','TEST_SINGLE_UNIT','TEST_ILLUMINATION','TEST_POOR_TWO','TEST_POOR_THREE','TEST_POOR_ONE','FASHION_WRONG_GENDER_WFP_VARIATIONS','FASHION_WRONG_GENDER_WFP','CENTERED_PHOTO','TMP_FASHION_ADHOC_FONDOS','MINIMUM_SIZE','SINGLE_UNIT','PRESENTATION','TEXT_LOGO','WATERMARK','WHITE_BACKGROUND','PROFESSIONAL_PICTURE')
+            OR (mod.FILTER_NAME IS NULL AND mod.PROCESS_NAME = 'Calidad de foto') THEN 'PQ'
+        WHEN mod.FILTER_GROUP_AJUSTADO = 'TP' AND mod.filter_name NOT IN ('ILLUMINATION','PRESENTATION','SINGLE_UNIT','GENERAL_QUALITY','CENTERED_PHOTO','CORRECT_POSE','PROTAGONIST_PRODUCT','COMPLETE_PRODUCT','CORRECT_BACKGROUND','PROFESSIONAL_PICTURE','WHITE_ BACKGROUND','MINIMUM_SIZE','TEXT_LOGO','WATERMARK','NOT_CERTIFIED_QUALITY_THUMBNAIL','NOT_CERTIFIED_QUALITY_THUMBNAIL_ACTIVE','PG_POOR_QUALITY_PICTURE_AUTO','POOR_QUALITY_PICTURE','POOR_QUALITY_THUMBNAIL','POOR_QUALITY_THUMBNAIL_ACTIVE','WTF_POOR_QUALITY_THUMBNAIL','PICTURE_SIZE_ERROR','PICTURE_WATERMARK_ERROR','PICTURE_TEXT_OR_LOGO_ERROR','PICTURE_WATERMARK_VARIANT','PICTURE_SIZE_VARIANT','GOOD_QUALITY_THUMBNAIL','PICTURE_ILLUMINATION_VARIANT','PRESENTATION_VARIANT','SINGLE_UNIT_VARIANT','GENERAL_QUALITY_VARIANT','ILLUMINATION_VARIANT','COMBINED_QUALITY_VARIANT','CENTERED_PHOTO_VARIANT','TEST_GENERAL_QUALITY','TEST_SINGLE_UNIT','TEST_ILLUMINATION','TEST_POOR_TWO','TEST_POOR_THREE','TEST_POOR_ONE','FASHION_WRONG_GENDER_WFP_VARIATIONS','FASHION_WRONG_GENDER_WFP','CENTERED_PHOTO','TMP_FASHION_ADHOC_FONDOS','MINIMUM_SIZE','SINGLE_UNIT','PRESENTATION','TEXT_LOGO','WATERMARK','WHITE_BACKGROUND','PROFESSIONAL_PICTURE')
+            OR (mod.FILTER_NAME IS NULL AND mod.PROCESS_NAME = 'PR - Técnica prohibida') THEN 'TP'
+    END AS FILTER_GROUP_CX,
+    inc.user_team_name AS NOMBRE_DEL_EQUIPO,
+    CASE WHEN inc.user_ldap LIKE 'ext%' THEN 'Externo' ELSE 'Interno' END AS Centro_rep,
+    COUNT(mod.CAS_CASE_ID) AS INCOMING,
+    COUNT(inc.ITE_ITEM_ID) AS ITE_ITEM_ID
+FROM `meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_CX_CONTACTS_MODS` mod
+LEFT JOIN `meli-bi-data.WHOWNER.BT_CX_CONTACTS` inc
+    ON inc.cas_case_id = mod.cas_case_id
+WHERE mod.MONTH_ID BETWEEN '{p1_start}' AND '{p2_end}'
+    AND mod.SIT_SITE_ID {site_filter}
+GROUP BY ALL
+"""
+                                },
+                            },
+
+                        }  # fin alternativas de _TODOS CDU
+                    },
+
+                }  # fin cdus de _TODOS proceso
+            },
+
+        }  # fin procesos de Moderaciones
     },
 
 }
@@ -481,6 +1014,10 @@ DRIVER_ALT_ALIASES = {
     'fbm': 'FBM Sellers',
     'FBM': 'FBM Sellers',
 
+    'moderaciones': 'Moderaciones',
+    'MODERACIONES': 'Moderaciones',
+    'Moderaciones': 'Moderaciones',
+
     # Procesos
     'reputacion_me': 'Reputación ME',
     'REPUTACION_ME': 'Reputación ME',
@@ -490,6 +1027,14 @@ DRIVER_ALT_ALIASES = {
 
     '_todos': '_TODOS',
     '_TODOS': '_TODOS',
+
+    'fbm_retiro_de_stock': 'FBM-Retiro de Stock',
+    'FBM_RETIRO_DE_STOCK': 'FBM-Retiro de Stock',
+    'FBM-Retiro de Stock': 'FBM-Retiro de Stock',
+    'fbm-retiro de stock': 'FBM-Retiro de Stock',
+    'retiro de stock': 'FBM-Retiro de Stock',
+    'retiro_de_stock': 'FBM-Retiro de Stock',
+    'retiro stock': 'FBM-Retiro de Stock',
 
     # CDUs
     'ht_colecta': 'HT Colecta',
@@ -512,6 +1057,27 @@ DRIVER_ALT_ALIASES = {
     'inbound_id': 'inbounds',
     'cantidad de inbounds': 'inbounds',
     'qty inbounds': 'inbounds',
+
+    'retiro_requests': 'retiro_requests',
+    'retiro requests': 'retiro_requests',
+    'requests de retiro': 'retiro_requests',
+    'withdrawal requests': 'retiro_requests',
+    'cantidad de requests': 'retiro_requests',
+    'qty requests': 'retiro_requests',
+
+    'items_moderados': 'items_moderados',
+    'items moderados': 'items_moderados',
+    'moderaciones driver': 'items_moderados',
+    'moderated items': 'items_moderados',
+    'cantidad de moderaciones': 'items_moderados',
+    'mod_event_id': 'items_moderados',
+
+    'sellers_con_stock': 'sellers_con_stock',
+    'sellers con stock': 'sellers_con_stock',
+    'sellers stock': 'sellers_con_stock',
+    'sellers with stock': 'sellers_con_stock',
+    'cantidad de sellers': 'sellers_con_stock',
+    'qty sellers': 'sellers_con_stock',
 }
 
 
@@ -855,6 +1421,8 @@ for d in todos:
     print(f"{d['commerce_group']} > {d['proceso']} > {d['cdu']} > {d['label']}")
 # ME PreDespacho > Reputación ME > HT Colecta > Paradas de Colecta
 # FBM Sellers > (Todos los procesos) > *INBOUND* (patrón) > Inbounds (Cantidad de INBOUND_ID)
+# FBM Sellers > FBM-Retiro de Stock > (Todos los CDUs) > Requests de Retiro
+# FBM Sellers > FBM-Retiro de Stock > (Todos los CDUs) > Sellers con Stock
 
 # ── EJEMPLO 2: Driver con site_filter directo (paradas_colecta) ──
 query = build_driver_query(

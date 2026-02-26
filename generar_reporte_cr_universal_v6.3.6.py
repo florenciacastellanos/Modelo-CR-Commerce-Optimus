@@ -1,9 +1,10 @@
 """
-Universal CR Report Generator v6.4.9
-====================================
+Universal CR Report Generator v6.4.10
+=====================================
 Generador universal de reportes de Contact Rate con múltiples aperturas dinámicas.
 
-Features v6.4.9:
+Features v6.4.10:
+- ⭐ **NUEVO v6.4.10: Card de Feriados del período (LK_TIM_HOLIDAYS) con lookback de 15 días**
 - ⭐ **NUEVO v6.4.9: Muestreo proporcional a CONTRIB_ABS (contribución real a variación de CR)**
 - ⭐ **NUEVO v6.4.9: Elimina sesgo por incoming - distribución basada en impacto porcentual**
 - ⭐ **NUEVO v6.4.9: Mínimo garantizado de 20 conversaciones por elemento-período**
@@ -29,6 +30,7 @@ Features v6.4.9:
 - 8 cards ejecutivas (orden: CR → Var → Incoming → Drivers)
 - Gráfico semanal después de cards
 - Correlación con eventos comerciales (usando hard metrics)
+- Card de feriados del período (WHOWNER.LK_TIM_HOLIDAYS) con lookback 15 días
 - Cuadros cuantitativos por dimensión
 - Análisis de conversaciones completo (integrado en resumen ejecutivo)
 - Footer colapsable con queries ejecutadas
@@ -91,7 +93,7 @@ if sys.platform == 'win32':
 import argparse
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import webbrowser
 from google.cloud.bigquery import Client, QueryJobConfig
 import pandas as pd
@@ -172,8 +174,8 @@ def calcular_distribucion_por_impacto(df_elementos, max_total=500, min_por_eleme
     """
     Distribuye muestra de conversaciones según CONTRIB_ABS (contribución real a variación de CR).
     
-    Fórmula: CONTRIB_ABS = |VAR_CASOS| / TOTAL_VAR_CASOS × 100
-    - Elementos con mayor contribución porcentual a la variación reciben más conversaciones
+    Fórmula: CONTRIB_ABS = VAR_CR_individual / VAR_CR_total × 100
+    - Elementos con mayor contribución porcentual a la variación de CR reciben más conversaciones
     - Garantiza mínimo de 20 conversaciones por elemento-período
     - Respeta límite global de 500 conversaciones
     - Mantiene ponderación 70% picos + 30% normales en query SQL
@@ -340,12 +342,12 @@ def configurar_analisis_claude(site, commerce_group, muestreo_dimension, p1_star
         
         if ambos_existen:
             try:
-                # Cargar análisis P1
-                with open(analisis_p1_path, 'r', encoding='utf-8') as f:
+                # Cargar análisis P1 (utf-8-sig tolera BOM si existe)
+                with open(analisis_p1_path, 'r', encoding='utf-8-sig') as f:
                     analisis_p1 = json.load(f)
                 
-                # Cargar análisis P2
-                with open(analisis_p2_path, 'r', encoding='utf-8') as f:
+                # Cargar análisis P2 (utf-8-sig tolera BOM si existe)
+                with open(analisis_p2_path, 'r', encoding='utf-8-sig') as f:
                     analisis_p2 = json.load(f)
                 
                 # Combinar análisis en estructura compatible con código existente
@@ -422,7 +424,7 @@ def configurar_analisis_claude(site, commerce_group, muestreo_dimension, p1_star
         
         if ANALISIS_CLAUDE_PATH.exists():
             try:
-                with open(ANALISIS_CLAUDE_PATH, 'r', encoding='utf-8') as f:
+                with open(ANALISIS_CLAUDE_PATH, 'r', encoding='utf-8-sig') as f:
                     ANALISIS_PREEXISTENTES = json.load(f)
                 
                 # VALIDACIÓN DE COHERENCIA
@@ -1116,6 +1118,7 @@ def ejecutar_query_eventos_fallback(site, p1_start, p1_end, p2_start, p2_end, co
             )
             AND UPPER(EVENT_NAME) NOT LIKE '%PRUEBA%'
             AND UPPER(EVENT_NAME) NOT LIKE '%TEST%'
+            AND STANDARD_METADATA.TYPE IN ('TIER_1', 'TIER_2', 'DOUBLE_DAYS')
     ),
     incoming_base AS (
         SELECT 
@@ -1441,6 +1444,150 @@ else:
     # v6.4.3: Ocultar sección si no hay datos de eventos comerciales
     print("[INFO] No hay datos de eventos comerciales disponibles - sección oculta")
     eventos_html = ""
+
+print()
+
+# ========================================
+# FERIADOS EN EL PERÍODO ANALIZADO (v6.4.10)
+# ========================================
+
+print("="*80)
+print("FERIADOS EN PERÍODO ANALIZADO")
+print("="*80 + "\n")
+
+feriados_html = ""
+feriados_data = []
+
+# Rango extendido: 15 días antes de P1 hasta fin de P2 (cubre efectos retardados)
+feriados_lookback_start = (p1_start_dt - timedelta(days=15)).strftime('%Y-%m-%d')
+feriados_range_end = p2_end_dt.strftime('%Y-%m-%d')
+
+query_feriados = f"""
+SELECT
+    SIT_SITE_ID,
+    TIM_DAY as Fecha_feriado,
+    HOLIDAY_DESC
+FROM `meli-bi-data.WHOWNER.LK_TIM_HOLIDAYS`
+WHERE {resolve_site_sql(args.site, 'SIT_SITE_ID')}
+    AND TIM_DAY BETWEEN '{feriados_lookback_start}' AND '{feriados_range_end}'
+ORDER BY TIM_DAY ASC
+"""
+
+try:
+    print(f"[QUERY] Consultando feriados desde {feriados_lookback_start} hasta {feriados_range_end}...")
+    df_feriados = client.query(query_feriados).to_dataframe()
+
+    if len(df_feriados) > 0:
+        df_feriados['Fecha_feriado'] = pd.to_datetime(df_feriados['Fecha_feriado'])
+
+        for _, row in df_feriados.iterrows():
+            fecha = row['Fecha_feriado']
+            fecha_str = fecha.strftime('%Y-%m-%d')
+            desc = row['HOLIDAY_DESC']
+            site = row['SIT_SITE_ID']
+
+            if fecha < p1_start_dt:
+                ubicacion = "Pre-período (15d previos)"
+            elif fecha <= p1_end_dt:
+                ubicacion = f"P1 ({p1_label_eventos})"
+            elif fecha <= p2_end_dt:
+                ubicacion = f"P2 ({p2_label_eventos})"
+            else:
+                ubicacion = "Fuera de rango"
+
+            feriados_data.append({
+                'fecha': fecha_str,
+                'descripcion': desc,
+                'site': site,
+                'ubicacion': ubicacion,
+                'dia_semana': fecha.strftime('%A')
+            })
+
+        print(f"[OK] {len(feriados_data)} feriados encontrados en el rango extendido")
+
+        queries_ejecutadas.append({
+            'nombre': 'Feriados del Período',
+            'query': query_feriados[:500] + '...',
+            'output': f'{len(feriados_data)} feriados encontrados'
+        })
+    else:
+        print("[INFO] No se encontraron feriados en el rango analizado")
+
+except Exception as e:
+    print(f"[WARNING] Error al consultar feriados: {e}")
+
+# Generar HTML de feriados
+if len(feriados_data) > 0:
+    DIAS_ES = {
+        'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles',
+        'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado', 'Sunday': 'Domingo'
+    }
+
+    feriados_pre = [f for f in feriados_data if f['ubicacion'].startswith('Pre-período')]
+    feriados_p1 = [f for f in feriados_data if f['ubicacion'].startswith('P1')]
+    feriados_p2 = [f for f in feriados_data if f['ubicacion'].startswith('P2')]
+
+    feriados_html = f"""
+        <div class="feriados-periodo">
+            <h2>🗓️ Feriados en el Período Analizado</h2>
+            <div class="info-box">
+                ℹ️ Se incluyen feriados desde 15 días previos al inicio de P1 ({feriados_lookback_start})
+                hasta el fin de P2 ({feriados_range_end}). Los feriados previos al período pueden generar
+                efectos retardados en el incoming (ej: demoras de entrega que se contactan días después).
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Día</th>
+                        <th>Feriado</th>
+                        <th>Site</th>
+                        <th>Ubicación</th>
+                    </tr>
+                </thead>
+                <tbody>
+    """
+
+    for f in feriados_data:
+        dia_es = DIAS_ES.get(f['dia_semana'], f['dia_semana'])
+
+        if f['ubicacion'].startswith('Pre-período'):
+            badge_class = "badge-pre"
+        elif f['ubicacion'].startswith('P1'):
+            badge_class = "badge-p1"
+        else:
+            badge_class = "badge-p2"
+
+        feriados_html += f"""
+                    <tr>
+                        <td class="number">{f['fecha']}</td>
+                        <td>{dia_es}</td>
+                        <td class="feriado-nombre">🏛️ {f['descripcion']}</td>
+                        <td>{f['site']}</td>
+                        <td><span class="badge {badge_class}">{f['ubicacion']}</span></td>
+                    </tr>
+        """
+
+    feriados_html += """
+                </tbody>
+            </table>
+            <div class="summary">
+                <span class="summary-icon">💡</span>
+                <span class="summary-text">
+    """
+    feriados_html += f"<strong>{len(feriados_pre)}</strong> feriados en los 15 días previos a P1, "
+    feriados_html += f"<strong>{len(feriados_p1)}</strong> en P1, "
+    feriados_html += f"<strong>{len(feriados_p2)}</strong> en P2. "
+    feriados_html += "Los feriados pueden impactar el incoming por cierres operativos, demoras acumuladas y cambios en patrones de contacto."
+    feriados_html += """
+                </span>
+            </div>
+        </div>
+    """
+
+    print(f"[OK] HTML de feriados generado con {len(feriados_data)} registros")
+else:
+    print("[INFO] Sin feriados para mostrar en el reporte")
 
 print()
 
@@ -2258,9 +2405,11 @@ for apertura in aperturas_list:
         print(f"[WARNING] No hay datos para {apertura}")
         continue
     
-    # Aplicar regla 80%
-    df_dimension['CONTRIB_ABS'] = df_dimension['VAR_ABS'] / df_dimension['VAR_ABS'].sum() * 100
-    df_dimension['CONTRIB_CUMSUM'] = df_dimension['CONTRIB_ABS'].cumsum()
+    # Aplicar regla 80% — Contribución % = VAR_CR_individual / VAR_CR_total × 100
+    _var_cr_elem = (df_dimension['INC_P2'] / drv_p2_total - df_dimension['INC_P1'] / drv_p1_total) * 100
+    df_dimension['CONTRIB_ABS'] = (_var_cr_elem / var_cr * 100) if var_cr != 0 else 0
+    df_dimension = df_dimension.sort_values('CONTRIB_ABS', key=abs, ascending=False).reset_index(drop=True)
+    df_dimension['CONTRIB_CUMSUM'] = df_dimension['CONTRIB_ABS'].abs().cumsum()
     
     # Calcular variación porcentual (VAR_INC_PCT) - Requerido por análisis comparativo
     df_dimension['VAR_INC_PCT'] = (df_dimension['VAR_INC'] / df_dimension['INC_P1']) * 100
@@ -3409,6 +3558,49 @@ html_content = f"""<!DOCTYPE html>
         }}
         .eventos-comerciales .no-data {{ text-align: center; padding: 24px; color: var(--meli-gray); font-style: italic; }}
         
+        /* ========== FERIADOS DEL PERÍODO ========== */
+        .feriados-periodo {{ 
+            background: var(--meli-white); 
+            padding: 28px 32px; 
+            border-radius: var(--radius); 
+            margin-bottom: 24px; 
+            box-shadow: var(--shadow-sm);
+        }}
+        .feriados-periodo h2 {{ 
+            color: var(--meli-dark); 
+            font-size: 20px; 
+            font-weight: 700; 
+            margin-bottom: 16px; 
+            padding-bottom: 12px; 
+            border-bottom: 2px solid var(--meli-yellow);
+        }}
+        .feriados-periodo .info-box {{ 
+            background: var(--meli-bg); 
+            border-left: 3px solid var(--meli-blue); 
+            padding: 10px 14px; 
+            margin-bottom: 16px; 
+            border-radius: 0 var(--radius) var(--radius) 0; 
+            font-size: 12px; 
+        }}
+        .feriados-periodo .feriado-nombre {{ font-weight: 600; }}
+        .feriados-periodo .badge {{ 
+            display: inline-block; 
+            padding: 3px 8px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: 700; 
+        }}
+        .feriados-periodo .badge-pre {{ background: #FFF3CD; color: #856404; }}
+        .feriados-periodo .badge-p1 {{ background: #D4EDDA; color: var(--meli-green); }}
+        .feriados-periodo .badge-p2 {{ background: #CCE5FF; color: var(--meli-blue); }}
+        .feriados-periodo .summary {{ 
+            background: var(--meli-bg); 
+            padding: 12px 16px; 
+            border-radius: var(--radius); 
+            margin-top: 16px; 
+            font-size: 13px;
+        }}
+        
         /* ========== WARNING BANNER ========== */
         .warning-banner {{ 
             background: var(--meli-yellow); 
@@ -3701,6 +3893,9 @@ html_content = f"""<!DOCTYPE html>
         
         <!-- EVENTOS COMERCIALES -->
         {eventos_html}
+        
+        <!-- FERIADOS DEL PERÍODO -->
+        {feriados_html}
         
         <!-- CUADROS CUANTITATIVOS -->
         <div class="section">
@@ -4188,6 +4383,15 @@ else:
             periodo_p2_str = f"{p2_start_dt.year}-{p2_start_dt.month:02d}"
             
             print(f"[AUTO-GEN] Usando análisis separados (v6.3.8 - detección de cambios de patrones)")
+            
+            # Sanitizar BOM de JSONs antes de pasarlos al combinador externo
+            for _json_path in [json_p1_path, json_p2_path]:
+                with open(_json_path, 'rb') as _f:
+                    _raw = _f.read()
+                if _raw.startswith(b'\xef\xbb\xbf'):
+                    with open(_json_path, 'wb') as _f:
+                        _f.write(_raw[3:])
+                    print(f"[FIX] BOM removido de {_json_path.name}")
             
             # Generar análisis comparativo desde análisis separados
             analisis_comp = generar_comparativo(

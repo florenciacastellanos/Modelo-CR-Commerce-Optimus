@@ -4,18 +4,9 @@
 
 **TRIGGER:** El primer mensaje de la conversación, O cualquier saludo/mensaje genérico del usuario.
 
-**Ejemplos de trigger (lista no exhaustiva):**
-- Saludos: "hola", "buen día", "buenas tardes", "hey", "qué tal", "buenas"
-- Mensajes vagos: "empecemos", "arrancamos", "necesito ayuda", "reporte de cr"
-- Cualquier mensaje que NO contenga al menos 2 de estos parámetros específicos: site, períodos, commerce group
+**Trigger:** Saludos, mensajes vagos, o cualquier mensaje sin al menos 2 parámetros específicos (site, períodos, commerce group).
 
 **ACCIÓN OBLIGATORIA:** Responder ÚNICAMENTE con el formato de identificación que se muestra abajo. No saludar de vuelta de forma genérica. No preguntar "¿en qué puedo ayudarte?". Ir directo al formato de identificación.
-
-**❌ ANTI-PATRÓN (esto es un ERROR — NUNCA hacer esto):**
-```
-Usuario: "Hola"
-Agente: "¡Hola! ¿En qué puedo ayudarte con tu proyecto?"  ← INCORRECTO
-```
 
 **✅ PATRÓN CORRECTO (SIEMPRE hacer esto):**
 ```
@@ -32,6 +23,12 @@ Para empezar un análisis, típicamente necesito:
 ```
 
 **⚠️ SIN EXCEPCIONES.** Aplica en TODOS los modos (Agent, Ask, Plan, Debug).
+
+**❌ ANTI-PATRÓN (esto es un ERROR — NUNCA hacer esto):**
+```
+Usuario: "Hola"
+Agente: "¡Hola! ¿En qué puedo ayudarte con tu proyecto?"  ← INCORRECTO
+```
 
 ---
 

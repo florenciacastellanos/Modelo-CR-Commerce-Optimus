@@ -1,0 +1,137 @@
+# Changelog - .cursorrules
+
+**Version actual:** 5.15
+**Last Updated:** 19 Febrero 2026
+
+---
+
+- **v5.15**: Optimización estructural del archivo `.cursorrules`
+  - Changelog movido a archivo dedicado (`docs/CHANGELOG_CURSORRULES.md`)
+  - Sección Análisis Comparativo v3.0 condensada (detalle en `docs/GUIA_ANALISIS_COMPARATIVO_v3.md`)
+  - ERROR 9 condensado (detalle en `docs/GOLDEN_TEMPLATES.md` y `docs/CHANGELOG_v6.3.8.md`)
+  - Sección Jerarquía de Documentación eliminada (cubierta por Referencias Rápidas)
+  - Reducción de ~195 líneas sin cambios funcionales
+- **v5.14**: Protocolo de primer mensaje reforzado (REGLA #0)
+  - Regla de saludo movida al inicio absoluto del archivo (líneas 1-3)
+  - Lista explícita de triggers (saludos, mensajes vagos, primer mensaje)
+  - Anti-patrón documentado con ejemplo de error vs correcto
+  - Refuerzo al final del archivo (recordatorio)
+  - Archivo dedicado `.cursor/rules/greeting-protocol.md` con `alwaysApply: true`
+- **v5.13**: ⭐ **NUEVO** Integración con repo complementario de Variables Duras de Negocio
+  - **Nueva Opción 5 (Variables de negocio)** en deep dive POST-ENTREGA:
+    - Verifica variables disponibles en `../commerce_xm-cr-business-vars/` para el Commerce Group/proceso analizado
+    - Normaliza nombres vía `process_aliases.yml`, busca disponibilidad en `process_registry.yml`
+    - Sugiere variables al usuario con nombre y descripción antes de ejecutar
+    - Renderiza `.sql` con parámetros del análisis CR en curso y ejecuta vía `bq query`
+    - Mapea filtros disponibles por tabla fuente (`available_filters` del `.yml`)
+    - Complementa el deep dive estándar, no lo reemplaza
+  - **Opción Cross-site** renombrada a Opción 6 (sin cambios funcionales)
+  - **Formato de salida**: Opción 5 se muestra condicionalmente (solo si hay variables configuradas)
+  - **Referencias Rápidas**: Agregada fila para repo de variables duras
+  - **Refs:** `../commerce_xm-cr-business-vars/.cursorrules` y `../commerce_xm-cr-business-vars/docs/02_agent_playbook.md`
+- **v5.12**: ⭐ **ACTUALIZADO** POST-ENTREGA: Definiciones completas para Deep Dive Adicional
+  - **6 definiciones implementadas**:
+    1. **Recursividad**: Una sola ronda de deep dive. Después de entregar, NO se re-ofrece
+    2. **Naming**: Archivo con mismo nombre + `_deep_dive` (ej: `reporte_cr_pdd_mla_..._deep_dive.html`)
+    3. **Elemento específico**: SIEMPRE preguntar al usuario en qué dimensión profundizar (nunca asumir)
+    4. **Temporal**: SIEMPRE preguntar al usuario qué quiere muestrear/analizar
+    5. **Cross-site**: NO SOPORTADO — informar al usuario que debe iniciar análisis nuevo
+    6. **Muestreo adicional**: Muestra fresca (re-muestreo de cero con N ampliado, no incremental)
+  - **4 opciones de deep dive** (cross-site eliminado): Nueva dimensión, Elemento específico, Muestrear conversaciones adicionales, Temporal
+  - **Regla general**: Cuando algo no está definido → PREGUNTAR al usuario antes de ejecutar
+  - **Output**: Siempre HTML v6.3.8 completo (cuantitativo + conversacional)
+  - **Consultas obligatorias** por opción documentadas en detalle
+- **v5.11**: POST-ENTREGA: Oferta de Deep Dive Adicional (OBLIGATORIO)
+  - Paso POST-ENTREGA inicial con 5 opciones (incluyendo cross-site, luego removido como opción activa en v5.12)
+  - Contexto dinámico y reglas base
+  - **Ref:** `docs/METODOLOGIA_5_FASES.md#post-entrega`
+- **v5.10**: ⭐ **NUEVO** Muestreo por CONTRIB_ABS v6.4.9
+  - **Cambio crítico en lógica de muestreo**: Ahora proporcional a **CONTRIB_ABS** (contribución % a variación de CR)
+  - **ANTES**: `muestreo = |VAR_CR| × Incoming` → Sesgo hacia elementos con alto incoming
+  - **AHORA**: `muestreo = CONTRIB_ABS` → Proporcional al impacto real en variación de CR
+  - **Ejemplo**: Si REPENTANT_BUYER tiene 32.9% CONTRIB_ABS y DEFECTIVE_ITEM tiene 20.6%, el muestreo asigna ~32.9% y ~20.6% del presupuesto respectivamente
+  - **Mantiene**: Mínimo 20 conversaciones por elemento-período, 70% picos + 30% normales
+  - **Beneficio**: Mayor correlación entre muestreo y análisis de impacto en CR
+- **v5.9**: Columnas de Contribución en Tabla de Causas Raíz v6.4.8
+- **v5.8**: ⭐ **NUEVO** Frecuencia Real de Muestra + Ordenamiento por % P2 (v6.4.5)
+  - **Columna CASOS**: Ahora muestra frecuencia real de conversaciones testeadas (no proporcional)
+  - **Ordenamiento de patrones**: Por **% de aparición en P2** (período más reciente)
+    - Patrones con mayor participación en P2 aparecen primero
+    - Refleja la situación actual de los contactos
+  - Archivos modificados:
+    - `scripts/generar_analisis_comparativo_desde_separados.py`
+    - `config/causas_sinonimos.py`
+    - `generar_reporte_cr_universal_v6.3.6.py`
+  - Aplica automáticamente a todos los reportes futuros
+- **v5.7a**: Sistema de Sinónimos con Auto-Aprendizaje (v6.4.3)
+  - **Consolidación de Causas Raíz**: Detecta y unifica causas semánticamente equivalentes
+    - Método 1: Diccionario semilla con 8 grupos de causas conocidas
+    - Método 2: Similaridad de texto (SequenceMatcher >= 80% auto-confirma)
+    - Método 3: Palabras comunes significativas (>= 2 + 65% similaridad)
+    - Método 4: Detección por palabras clave temáticas
+  - **Auto-Aprendizaje**: Sistema que se retroalimenta
+    - Detecta nuevas similitudes durante análisis
+    - Auto-confirma (score >= 80%) o marca pendientes para revisión
+    - Biblioteca persistente en `config/causas_biblioteca_aprendida.json`
+  - **Archivos nuevos**:
+    - `config/causas_sinonimos.py` - Módulo principal con lógica de consolidación
+    - `config/causas_biblioteca_aprendida.json` - Biblioteca de aprendizaje
+    - `docs/SISTEMA_SINONIMOS.md` - Documentación completa
+  - **Integración**: `generar_analisis_comparativo_desde_separados.py` usa consolidación automáticamente
+  - **Ref:** `docs/SISTEMA_SINONIMOS.md`
+- **v5.7b**: Columnas de Contribución en Tabla de Causas Raíz v6.4.8
+  - **Nuevas columnas en tabla de causas raíz**:
+    - **Contrib Δ**: Contribución de cada causa a la variación total de casos de la apertura
+      - Fórmula: `(VAR CASOS causa / VAR CASOS total) × 100`
+    - **Contrib CR**: Contribución al cambio de CR del Commerce Group completo
+      - Fórmula: `Contrib Δ × (Contribución de la apertura al CR total) / 100`
+  - **Fila TOTAL**: Muestra 100% en Contrib Δ y la contribución total de la apertura en Contrib CR
+  - **Aplicado a los 3 bloques** de generación de tablas de análisis comparativo
+  - **Estilo visual**: Contrib CR en color Meli azul (#3483FA) para destacar métrica clave
+- **v5.6**: Eventos Comerciales v6.4.2 + Hallazgo Principal v6.4.1
+  - **Hallazgo Principal (v6.4.1)**: Sección automática post-Resumen Ejecutivo con interpretación de negocio
+    - Detecta temporalidad (post-temporada alta, Hot Sale, etc.)
+    - Analiza variación de incoming y dirección del CR
+    - Integra causas raíz del análisis de conversaciones
+    - Menciona eventos comerciales relevantes automáticamente
+  - **Eventos Comerciales (v6.4.2)**: Sistema híbrido completo
+    - Prioridad 1: Hard Metrics pre-calculadas (.parquet)
+    - Prioridad 2: Query fallback on-the-fly (LK_MKP_PROMOTIONS_EVENT)
+    - Tabla comparativa P1 vs P2 con delta de casos
+    - Iconos por tipo de evento (🛒 Black Friday, 🎄 Navidad, 🔥 Hot Sale)
+    - Badges visuales (positivo/negativo/neutral)
+    - Integración automática en Hallazgo Principal
+    - CSS dedicado con diseño visual mejorado
+    - Footer técnico actualizado con metadata de eventos
+- **v5.5**: Cards Colapsables v6.4.0 para Análisis Comparativo
+  - Cada elemento de apertura (CDU, PROCESO, TIPIFICACION, etc.) se presenta en una card colapsable
+  - Cards ordenadas por **contribución a la variación de CR** (mayor impacto primero)
+  - Ranking visual (#1, #2, #3 con estilo especial para Top 3)
+  - Badges dinámicos: contribución %, variación de casos, total conversaciones
+  - Botones "Expandir todas" / "Colapsar todas" para navegación rápida
+  - Primera card expandida por defecto
+  - Funcionalidad universal: aplica a cualquier apertura (CDU, PROCESO, TIPIFICACION, etc.)
+  - Los 3 bloques de generación de análisis comparativo actualizados para consistencia
+- **v5.4**: ⭐ **NUEVO** ERROR 9: Formato Obligatorio de Reporte v6.3.8
+  - Todo reporte DEBE generarse con el script oficial
+  - Checklist obligatorio de 8 componentes pre-entrega
+  - Prohibición explícita de generar HTML ad-hoc
+  - Componentes obligatorios documentados en tabla
+  - Ref: `docs/CHANGELOG_v6.3.8.md`
+- **v5.3**: Análisis Comparativo v3.0 (detección real de patrones por período)
+  - Prompt comparativo con conversaciones de ambos períodos
+  - Detección de patrones: PERSISTENTE / NUEVO / DESAPARECE
+  - Máximo 4-5 causas raíz priorizadas por impacto
+  - Porcentajes reales (no proporcionales)
+  - Elimina sesgo de división proporcional del v2.0
+  - Scripts: `generar_analisis_comparativo_directo.py` + adaptador v3→v2
+  - Documentación detallada movida a `/docs`:
+    - `docs/REGLAS_CRITICAS_DETALLADAS.md` (8 errores explicados)
+    - `docs/METODOLOGIA_5_FASES.md` (flujo completo)
+    - `docs/INTERPRETACION_AUTOMATICA.md` (mapeo automático)
+    - `docs/PROTOCOLO_CURSOR_AI.md` (flujo v6.3.6)
+    - `docs/GUIA_ANALISIS_COMPARATIVO_v3.md` (análisis comparativo)
+  - Optimización: 1,139 líneas → ~510 líneas (55% reducción, 0% pérdida info)
+- v5.2: Actualizado a template v6.3.6 (espera automática para análisis)
+- v5.1: Actualizado a template v6.3.4 (robustez universal)
+- v5.0: Checklist ejecutable + reducción de "críticos" de 36 a 8 + estructura optimizada

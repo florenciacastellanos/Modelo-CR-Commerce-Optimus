@@ -559,6 +559,47 @@ Los reportes DEBEN estructurarse en 5 niveles de profundidad creciente, donde ca
 
 ---
 
+## 🗓️ Sección de Feriados (v6.4.10)
+
+### Ubicación en el reporte
+Después de **Eventos Comerciales** y antes de **Cuadros Cuantitativos por Dimensión**.
+
+### Fuente de datos
+```sql
+SELECT SIT_SITE_ID, TIM_DAY as Fecha_feriado, HOLIDAY_DESC
+FROM `meli-bi-data.WHOWNER.LK_TIM_HOLIDAYS`
+WHERE SIT_SITE_ID = '{site}'
+  AND TIM_DAY BETWEEN '{p1_start - 15 días}' AND '{p2_end}'
+ORDER BY TIM_DAY ASC
+```
+
+### Rango temporal
+- **15 días previos al inicio de P1**: Cubre efectos retardados (ej: demoras de entrega por cierre operativo que generan contactos días después)
+- **P1 completo**: Feriados dentro del primer período de análisis
+- **P2 completo**: Feriados dentro del segundo período de análisis
+
+### Contenido de la card
+| Columna | Descripción |
+|---------|-------------|
+| **Fecha** | Fecha del feriado (YYYY-MM-DD) |
+| **Día** | Día de la semana en español |
+| **Feriado** | Descripción del feriado (HOLIDAY_DESC) |
+| **Site** | Site al que aplica el feriado |
+| **Ubicación** | Pre-período (15d previos), P1 o P2 |
+
+### Badges de ubicación
+- **Amarillo**: Pre-período (15 días previos)
+- **Verde**: P1
+- **Azul**: P2
+
+### Resumen
+Conteo de feriados por ubicación temporal y nota sobre posibles impactos operacionales.
+
+### Propósito
+Dato informativo/contextual. No modifica cálculos de CR, incoming ni drivers. Permite al analista considerar el impacto de feriados en su interpretación del análisis.
+
+---
+
 ## ✅ Checklist de Validación
 
 Antes de entregar un reporte, verificar:

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "descripcion": "Biblioteca de sinónimos aprendidos automáticamente. Se actualiza cada vez que el sistema detecta nuevas similitudes.",
-  "ultima_actualizacion": "2026-02-08T22:05:49.237738",
+  "ultima_actualizacion": "2026-02-18T17:09:30.122952",
   "confirmados": {
     "auto_20260206_011502": {
       "nombre_canonico": "Producto recibido incompleto o diferente al comprado",
@@ -65,6 +65,24 @@
       ],
       "auto_detectado": true,
       "score_original": 1.0
+    },
+    "auto_20260218_170928": {
+      "nombre_canonico": "Producto dañado durante el transporte DS",
+      "variantes": [
+        "Producto dañado durante el envío por transporte",
+        "Producto dañado durante el transporte DS"
+      ],
+      "auto_detectado": true,
+      "score_original": 0.851
+    },
+    "auto_20260218_170929": {
+      "nombre_canonico": "Producto dañado durante el transporte logístico",
+      "variantes": [
+        "Producto dañado durante el transporte por golpes",
+        "Producto dañado durante el transporte logístico"
+      ],
+      "auto_detectado": true,
+      "score_original": 0.863
     }
   },
   "pendientes": [
@@ -136,6 +154,46 @@
       "score": 0.73,
       "metodo": "palabras_comunes",
       "fecha_deteccion": "2026-02-06T12:21:56.773079",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Embalaje inadecuado entre productos del pedido",
+        "Embalaje inadecuado para productos frágiles o líquidos"
+      ],
+      "score": 0.74,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-18T17:09:28.625895",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Producto no cumple expectativas del comprador",
+        "Producto no cumple funciones o expectativas de uso"
+      ],
+      "score": 0.758,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-18T17:09:28.789537",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Producto recibido diferente al publicado en anuncio",
+        "Producto recibido completamente diferente al comprado"
+      ],
+      "score": 0.673,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-18T17:09:29.244839",
+      "confirmado": false
+    },
+    {
+      "causas": [
+        "Producto dañado durante transporte por mal manejo",
+        "Producto dañado en transporte por embalaje deficiente"
+      ],
+      "score": 0.765,
+      "metodo": "palabras_comunes",
+      "fecha_deteccion": "2026-02-18T17:09:29.833284",
       "confirmado": false
     }
   ],

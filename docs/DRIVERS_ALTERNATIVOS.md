@@ -90,7 +90,13 @@ Cada "parada" es una visita única de colecta definida por la combinación vende
 **Descripción:**  
 Total de inbounds únicos recibidos en el período. Cada inbound se identifica por `INBOUND_ID`. Permite calcular el CR sobre el volumen real de operaciones de ingreso de mercadería a warehouses FBM.
 
-**Filtros base (siempre aplicados):**
+**Filtro de numerador (incoming):**
+
+| Campo | Condición | Descripción |
+|-------|-----------|-------------|
+| `PROCESS_ID` | `IN (615, 1981, 2418)` | El incoming debe filtrarse solo por estos Process IDs al usar este driver alternativo |
+
+**Filtros base del denominador (siempre aplicados):**
 
 | Filtro | Condición | Razón |
 |--------|-----------|-------|
@@ -115,6 +121,96 @@ Total de inbounds únicos recibidos en el período. Cada inbound se identifica p
 
 **Caso de uso típico:**  
 "Quiero ver el CR de FBM Sellers para CDUs de INBOUND sobre cantidad de inbounds en MLB, no sobre órdenes con FBM"
+
+---
+
+### 3. FBM Sellers > FBM-Retiro de Stock > (Todos los CDUs)
+
+#### `retiro_requests` - Requests de Retiro de Stock
+
+| Campo | Valor |
+|-------|-------|
+| **Label** | Requests de Retiro de Stock |
+| **Tabla principal** | `meli-bi-data.WHOWNER.BT_FBM_WITHDRAWALS_V2` |
+| **Tablas JOIN (detalle)** | `meli-bi-data.EXPLOTACION.SEGMENTO` (segmento seller), `meli-bi-data.WHOWNER.DM_SUGGESTION_KVS_DATA` (retiros sugeridos) |
+| **Campo fecha** | `FBM_WIT_DATE_CREATED` |
+| **Expresión de conteo** | `COUNT(DISTINCT FBM_WIT_REQUEST_ID)` |
+| **Filtro por site** | Si (directo: `SIT_SITE_ID`) |
+| **Tipo filtro site** | `direct` |
+| **Sites disponibles** | MLA, MLB, MLC, MCO, MLM |
+| **Driver estándar** | `SUM(drv.OS_WITH_FBM)` (Shipping) |
+
+**Descripción:**  
+Total de requests de retiro de stock únicos realizados en el período. Cada request se identifica por `FBM_WIT_REQUEST_ID` y se deduplica tomando la primera fecha de creación. Permite calcular el CR sobre el volumen real de operaciones de retiro de stock en FBM, en lugar de usar órdenes con FBM como denominador.
+
+**Filtros base (siempre aplicados):**
+
+| Filtro | Condición | Razón |
+|--------|-----------|-------|
+| `warehouse_id` | `NOT LIKE '%TW%' AND NOT LIKE '%TR%'` | Excluir warehouses TW y TR |
+| Deduplicación | `QUALIFY ROW_NUMBER() OVER(PARTITION BY FBM_WIT_REQUEST_ID ORDER BY FBM_WIT_DATE_CREATED ASC) = 1` | Tomar primera ocurrencia de cada request |
+
+**Clasificaciones disponibles:**
+
+| Clasificación | Descripción | Valores |
+|--------------|-------------|---------|
+| `TIPO_LOGISTICO` | Tipo logístico con detección de transfers | TRANSFER, CROSS_DOCKING, SAME_WAREHOUSE, DROP_OFF, etc. |
+| `TIPO_LOGISTICO2` | Tipo logístico original (`FBM_SHIPMENT_TYPE`) | Valores dinámicos |
+| `SEGMENTO` | Segmento del seller (desde tabla EXPLOTACION.SEGMENTO) | Valores dinámicos |
+| `flag_sugerido` | Si el retiro fue sugerido por el sistema (confirmed en DM_SUGGESTION_KVS_DATA) | 0 (no sugerido), 1 (sugerido) |
+
+**Proceso match:** Aplica al proceso `FBM-Retiro de Stock` dentro de FBM Sellers.
+
+**CDU match:** Aplica a todos los CDUs del proceso (`_TODOS`).
+
+**Caso de uso típico:**  
+"Quiero ver el CR de FBM-Retiro de Stock sobre cantidad de requests de retiro en MLA, no sobre órdenes con FBM"
+
+---
+
+### 4. Moderaciones > (Todos los procesos) > (Todos los CDUs)
+
+#### `items_moderados` - Items Moderados (Cantidad de mod_event_id)
+
+| Campo | Valor |
+|-------|-------|
+| **Label** | Items Moderados (Cantidad de mod_event_id) |
+| **Tabla** | `meli-bi-data.SBOX_CX_BI_ADS_CORE.BT_MODERATIONS` |
+| **Campo fecha** | `MONTH_ID` (partición mensual) |
+| **Expresión de conteo** | `COUNT(DISTINCT mod_event_id)` |
+| **Filtro por site** | Si (directo: `SIT_SITE_ID`) |
+| **Tipo filtro site** | `direct` |
+| **Sites disponibles** | MLA, MLB, MLM, MCO, MLC, MLU, MEC, MPE |
+| **Driver estándar** | `COUNT(DISTINCT ORD_ORDER_ID)` (Órdenes por site) |
+
+**Descripción:**  
+Total de eventos de moderación únicos en el período. Solo considera primera moderación (`FLG_FIRST_MOD = true`). A más items moderados, más contactos potenciales en Moderaciones. Un aumento en órdenes NO explica la variación de Moderaciones; este driver refleja el volumen real de acciones de moderación.
+
+**Filtros base (siempre aplicados):**
+
+| Filtro | Condición | Razón |
+|--------|-----------|-------|
+| `FLG_FIRST_MOD` | `= true` | Solo primera moderación de cada item |
+| `SIT_SITE_ID` | `<> 'MLV'` | Excluir MLV (exclusión global) |
+
+**Clasificaciones disponibles:**
+
+| Clasificación | Descripción | Valores |
+|--------------|-------------|---------|
+| `FILTER_GROUP` | Grupo de filtro original | PI, DP, AP, TP |
+| `FILTER_GROUP_CX` | Grupo CX (separa calidad foto de TP) | PI (Propiedad Intelectual), DP (Datos Personales), AP (Artículos Prohibidos), TP (Técnica Prohibida sin foto), PQ (Calidad de Foto) |
+| `FILTER_GROUP_CX3` | Sub-agrupación granular | Calidad de Foto, Mal Categorizado, Duplicados, Labels, Evasion, Out of Topic, Contenido Sensible, Otros TP |
+| `FLG_CBT` | Flag Cross-Border Trade | Valores dinámicos |
+| `FILTER_NAME` | Nombre individual de filtro de moderación | Valores dinámicos |
+
+**Proceso match:** Aplica a todos los procesos dentro de Moderaciones (`_TODOS`).
+
+**CDU match:** Aplica a todos los CDUs (`_TODOS`).
+
+**Nota sobre temporalidad:** `MONTH_ID` es partición mensual, por lo que el gráfico de tendencia es MENSUAL (no semanal). Se muestran 12 meses de historia.
+
+**Caso de uso típico:**  
+"Quiero ver el CR de Moderaciones sobre cantidad de items moderados en MLA, no sobre órdenes"
 
 ---
 
@@ -210,7 +306,9 @@ Para agregar un nuevo driver, añadir una entrada en `DRIVERS_ALTERNATIVOS` en `
 
 ---
 
-**Versión:** 1.1  
+**Versión:** 1.3  
 **Changelog:**
+- v1.3 (Feb 2026): Agregado driver Items Moderados para Moderaciones. Tabla BT_MODERATIONS, partición mensual. Clasificaciones: FILTER_GROUP_CX (PI/DP/AP/TP/PQ), FILTER_GROUP_CX3 (sub-agrupación granular), FLG_CBT, FILTER_NAME
+- v1.2 (Feb 2026): Agregado driver Requests de Retiro de Stock para FBM Sellers > FBM-Retiro de Stock. Filtro directo por SIT_SITE_ID. Clasificaciones: TIPO_LOGISTICO, SEGMENTO, flag_sugerido
 - v1.1 (Feb 2026): Agregado driver Inbounds para FBM Sellers (CDUs con INBOUND). Soporte para site via warehouse_prefix
 - v1.0 (Feb 2026): Primera versión con driver de Paradas de Colecta para ME PreDespacho > Reputación ME > HT Colecta

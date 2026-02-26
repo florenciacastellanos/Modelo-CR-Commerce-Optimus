@@ -28,6 +28,26 @@ py generar_reporte_cr_universal_v6.3.6.py \
 - 💬 Análisis cualitativo de conversaciones
 - 🔄 Análisis comparativo automático (período 1 vs período 2)
 - 🎯 Correlación con eventos comerciales
+- 🗓️ Feriados del período (incluye 15 días previos para efectos retardados)
+
+---
+
+## 🆕 Novedades v6.4.10 (Febrero 2026)
+
+### **🗓️ Feriados del Período Analizado**
+
+1. **Card informativa de feriados en el reporte HTML:**
+   - Consulta automática a `meli-bi-data.WHOWNER.LK_TIM_HOLIDAYS`
+   - Muestra feriados dentro de P1, P2 y los **15 días previos** al inicio de P1
+   - Los 15 días previos cubren posibles **efectos retardados** (ej: demoras de entrega por cierre operativo)
+   - Incluye fecha, día de la semana, descripción del feriado, site y ubicación temporal
+   - Card posicionada después de Eventos Comerciales y antes de Cuadros Cuantitativos
+   - Diseño consistente con el estilo institucional de MeLi
+
+2. **Datos informativos (sin desviar el análisis):**
+   - La información se presenta como contexto operacional
+   - No modifica cálculos de CR, incoming ni drivers
+   - Permite al analista considerar el impacto de feriados en su interpretación
 
 ---
 
