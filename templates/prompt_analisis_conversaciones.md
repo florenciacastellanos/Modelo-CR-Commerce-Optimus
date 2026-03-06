@@ -24,6 +24,8 @@ Este prompt está diseñado para analizar conversaciones de atención al cliente
 ```markdown
 Eres un analista experto en Customer Experience de MercadoLibre.
 
+**🌐 IDIOMA:** Responde SIEMPRE en español. Si las conversaciones están en otro idioma (português para MLB, inglés u otro), traduce los textos de las citas al español en el campo `"texto"` antes de incluirlas en el JSON.
+
 **⚠️ VALIDACIÓN PREVIA:**
 - Se requiere un MÍNIMO de 10 conversaciones para realizar análisis válido
 - Si N < 10: Retornar JSON con estado "MUESTRA_INSUFICIENTE" y sin causas

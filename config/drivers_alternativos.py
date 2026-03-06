@@ -993,6 +993,434 @@ GROUP BY ALL
         }  # fin procesos de Moderaciones
     },
 
+
+    # ========================================================================
+    # PRE VENTA (Marketplace)
+    # ========================================================================
+    'Pre Venta': {
+        'driver_estandar_ref': 'orders_by_site / COUNT(DISTINCT ORD_ORDER_ID)',
+        'procesos': {
+
+            # ────────────────────────────────────────────────────────────────
+            # PROCESO: _TODOS
+            # Aplica a: Gestión de Publicaciones, Potenciar Ventas,
+            #           Altas de publicar, Denuncia de Usuarios.
+            # NO aplica a: Afiliados (universo diferente, sin correlación).
+            # ────────────────────────────────────────────────────────────────
+            '_TODOS': {
+                'cdus': {
+
+                    # ════════════════════════════════════════════════════════
+                    # CDU: _TODOS
+                    # ════════════════════════════════════════════════════════
+                    '_TODOS': {
+                        'alternativas': {
+
+                            'sellers_activos': {
+                                'label': 'Sellers Activos por Mes',
+                                'description': (
+                                    'Total de sellers únicos con al menos una orden cerrada '
+                                    '(ORD_CLOSED_DT) en el período, con ORD_TGMV_FLG y '
+                                    'ORD_ORDER_MARKETPLACE_FLG activos. '
+                                    'Mide el universo real de vendedores que operaron en el site, '
+                                    'que es la población expuesta a generar contactos de Pre Venta. '
+                                    'Se usa COUNT(DISTINCT ord_Seller__id) como denominador.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.WHOWNER.BT_ORD_ORDERS',
+                                'fecha_field': 'ORD_CLOSED_DT',
+                                'count_expression': 'COUNT(DISTINCT ORD.ord_Seller__id)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE'],
+                                'notas': (
+                                    'Útil para calcular el CR de Pre Venta sobre el universo real '
+                                    'de sellers activos, en lugar de órdenes. '
+                                    'Pre Venta ocurre ANTES de la compra, por lo que el denominador '
+                                    'de órdenes no refleja correctamente el universo de usuarios '
+                                    'que pueden contactar: a más sellers activos publicando, '
+                                    'mayor probabilidad de contactos por dudas de publicación, '
+                                    'potenciamiento de ventas, altas, o denuncias. '
+                                    'Aplica a procesos: Gestión de Publicaciones, Potenciar Ventas, '
+                                    'Altas de publicar, Denuncia de Usuarios. '
+                                    'NO aplica a Afiliados (universo diferente). '
+                                    'Filtros base: ORD_TGMV_FLG = TRUE, '
+                                    'ORD_ORDER_MARKETPLACE_FLG = TRUE, excluye MLV.'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'ORD_TGMV_FLG': '= TRUE',
+                                    'ORD_ORDER_MARKETPLACE_FLG': '= TRUE',
+                                    'SIT_SITE_ID': "<> 'MLV' (excluido siempre)",
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de sellers activos P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN DATE(ORD.ORD_CLOSED_DT) BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN ORD.ord_Seller__id
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN DATE(ORD.ORD_CLOSED_DT) BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN ORD.ord_Seller__id
+    END) AS DRV_P2
+FROM `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
+WHERE DATE(ORD.ORD_CLOSED_DT) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND ORD.ORD_TGMV_FLG = TRUE
+    AND ORD.ORD_ORDER_MARKETPLACE_FLG = TRUE
+    AND ORD.SIT_SITE_ID {site_filter}
+    AND ORD.SIT_SITE_ID <> 'MLV'
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Para gráfico de tendencia
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+SELECT
+    DATE_TRUNC(DATE(ORD.ORD_CLOSED_DT), WEEK(MONDAY)) AS SEMANA,
+    COUNT(DISTINCT ORD.ord_Seller__id) AS DRIVER
+FROM `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
+WHERE DATE(ORD.ORD_CLOSED_DT) BETWEEN DATE_SUB('{p2_end}', INTERVAL 25 WEEK) AND '{p2_end}'
+    AND ORD.ORD_TGMV_FLG = TRUE
+    AND ORD.ORD_ORDER_MARKETPLACE_FLG = TRUE
+    AND ORD.SIT_SITE_ID {site_filter}
+    AND ORD.SIT_SITE_ID <> 'MLV'
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Sellers activos por mes y site
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+SELECT
+    DATE_TRUNC(DATE(ORD.ORD_CLOSED_DT), MONTH) AS MES,
+    ORD.SIT_SITE_ID,
+    COUNT(DISTINCT ORD.ord_Seller__id) AS SELLERS_ACTIVOS,
+    COUNT(DISTINCT ORD.ORD_ORDER_ID) AS ORDENES_TOTALES,
+    SAFE_DIVIDE(COUNT(DISTINCT ORD.ORD_ORDER_ID), COUNT(DISTINCT ORD.ord_Seller__id)) AS ORDENES_POR_SELLER
+FROM `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
+WHERE DATE(ORD.ORD_CLOSED_DT) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND ORD.ORD_TGMV_FLG = TRUE
+    AND ORD.ORD_ORDER_MARKETPLACE_FLG = TRUE
+    AND ORD.SIT_SITE_ID {site_filter}
+    AND ORD.SIT_SITE_ID <> 'MLV'
+GROUP BY ALL
+ORDER BY MES, SELLERS_ACTIVOS DESC
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {},
+
+                                # ────────────────────────────────────────────
+                                # PROCESOS EXCLUIDOS (contexto de negocio)
+                                # ────────────────────────────────────────────
+                                'procesos_excluidos': ['Afiliados'],
+
+                            },
+
+                        }  # fin alternativas de _TODOS CDU
+                    },
+
+                    # ════════════════════════════════════════════════════════
+                    # CDU: _CONTIENE_CATALOGO
+                    # Patrón: aplica cuando el Sub CDU contiene la palabra
+                    # "Catálogo" (4 Sub CDUs identificados).
+                    # ⚠️ DEPENDENCIA: requiere campo SUB_CDU en la tabla base
+                    # de Contact Rate para filtrar los casos correspondientes.
+                    # ════════════════════════════════════════════════════════
+                    '_CONTIENE_CATALOGO': {
+                        'alternativas': {
+
+                            'items_buybox': {
+                                'label': 'Ítems en BuyBox (Catálogo)',
+                                'description': (
+                                    'Total de ítems únicos (ITE_ITEM_ID) presentes en la '
+                                    'BuyBox del catálogo en el período, según snapshots de '
+                                    'LK_BUYBOX_PRODUCT_STATUS_PH (tabla COMPETING_ITEMS). '
+                                    'Mide el universo real de ítems compitiendo en el catálogo, '
+                                    'que es la población expuesta a generar contactos de '
+                                    'Sub CDUs de tipo Catálogo en Pre Venta.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.WHOWNER.LK_BUYBOX_PRODUCT_STATUS_PH',
+                                'fecha_field': 'PHOTO_ID',
+                                'count_expression': 'COUNT(DISTINCT competing.ITE_ITEM_ID)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE'],
+                                'notas': (
+                                    'Útil para calcular el CR de los Sub CDUs de Catálogo en '
+                                    'Pre Venta sobre el universo real de ítems en BuyBox, en '
+                                    'lugar de órdenes. A más ítems en el catálogo, mayor '
+                                    'exposición de sellers a problemas relacionados con el '
+                                    'catálogo (atributos, contenido, buybox disputes). '
+                                    'PHOTO_ID es un campo DATETIME de snapshot (no transaccional). '
+                                    'Se usa DATE(PHOTO_ID) para filtros de rango. '
+                                    'Si la tabla tiene granularidad mensual, el gráfico de '
+                                    'tendencia mostrará puntos mensuales en lugar de semanales. '
+                                    '⚠️ DEPENDENCIA DE IMPLEMENTACIÓN: para filtrar el incoming '
+                                    'de los Sub CDUs de Catálogo, es necesario incorporar el '
+                                    'campo SUB_CDU en la tabla base de Contact Rate '
+                                    '(BT_CX_CONTACTS o equivalente). Sin ese campo, el '
+                                    'incoming no puede segmentarse por Sub CDU. '
+                                    'Aplica a los 4 Sub CDUs que contienen la palabra "Catálogo".'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'sit_site_id': "<> 'MLV' (excluido siempre)",
+                                },
+
+                                # ────────────────────────────────────────────
+                                # DEPENDENCIAS DE IMPLEMENTACIÓN
+                                # ────────────────────────────────────────────
+                                'dependencias': {
+                                    'campo_requerido_incoming': 'SUB_CDU',
+                                    'tabla_incoming': 'BT_CX_CONTACTS (o tabla base de CR)',
+                                    'descripcion': (
+                                        'Para segmentar el incoming por Sub CDU de Catálogo '
+                                        'se debe incorporar el campo SUB_CDU en la query base '
+                                        'de Contact Rate y filtrar por los 4 Sub CDUs '
+                                        'que contienen la palabra "Catálogo".'
+                                    ),
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de ítems en BuyBox P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN DATE(bb.PHOTO_ID) BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN competing.ITE_ITEM_ID
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN DATE(bb.PHOTO_ID) BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN competing.ITE_ITEM_ID
+    END) AS DRV_P2
+FROM `meli-bi-data.WHOWNER.LK_BUYBOX_PRODUCT_STATUS_PH` bb,
+UNNEST(COMPETING_ITEMS) AS competing
+WHERE DATE(bb.PHOTO_ID) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND bb.sit_site_id {site_filter}
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Para gráfico de tendencia
+                                # Nota: si PHOTO_ID es snapshot mensual, el gráfico
+                                # tendrá granularidad mensual (un punto por mes).
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+SELECT
+    DATE_TRUNC(DATE(bb.PHOTO_ID), WEEK(MONDAY)) AS SEMANA,
+    COUNT(DISTINCT competing.ITE_ITEM_ID) AS DRIVER
+FROM `meli-bi-data.WHOWNER.LK_BUYBOX_PRODUCT_STATUS_PH` bb,
+UNNEST(COMPETING_ITEMS) AS competing
+WHERE DATE(bb.PHOTO_ID) BETWEEN DATE_SUB('{p2_end}', INTERVAL 25 WEEK) AND '{p2_end}'
+    AND bb.sit_site_id {site_filter}
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Ítems y sellers en BuyBox por mes
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+SELECT
+    DATE_TRUNC(DATE(bb.PHOTO_ID), MONTH) AS MES,
+    bb.sit_site_id AS SITE,
+    COUNT(DISTINCT competing.ITE_ITEM_ID) AS ITEMS_EN_BUYBOX,
+    COUNT(DISTINCT competing.CUS_CUST_ID_SEL) AS SELLERS_EN_BUYBOX,
+    SAFE_DIVIDE(
+        COUNT(DISTINCT competing.ITE_ITEM_ID),
+        COUNT(DISTINCT competing.CUS_CUST_ID_SEL)
+    ) AS ITEMS_POR_SELLER,
+    LAG(COUNT(DISTINCT competing.ITE_ITEM_ID)) OVER (
+        PARTITION BY bb.sit_site_id ORDER BY DATE_TRUNC(DATE(bb.PHOTO_ID), MONTH)
+    ) AS ITEMS_MES_ANTERIOR,
+    SAFE_DIVIDE(
+        COUNT(DISTINCT competing.ITE_ITEM_ID)
+        - LAG(COUNT(DISTINCT competing.ITE_ITEM_ID)) OVER (
+            PARTITION BY bb.sit_site_id ORDER BY DATE_TRUNC(DATE(bb.PHOTO_ID), MONTH)
+        ),
+        LAG(COUNT(DISTINCT competing.ITE_ITEM_ID)) OVER (
+            PARTITION BY bb.sit_site_id ORDER BY DATE_TRUNC(DATE(bb.PHOTO_ID), MONTH)
+        )
+    ) AS VAR_ITEMS_PCT
+FROM `meli-bi-data.WHOWNER.LK_BUYBOX_PRODUCT_STATUS_PH` bb,
+UNNEST(COMPETING_ITEMS) AS competing
+WHERE DATE(bb.PHOTO_ID) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND bb.sit_site_id {site_filter}
+GROUP BY ALL
+ORDER BY MES, ITEMS_EN_BUYBOX DESC
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {},
+
+                                # ────────────────────────────────────────────
+                                # SUB CDUs DE APLICACIÓN (contexto de negocio)
+                                # ────────────────────────────────────────────
+                                'sub_cdus_aplicacion': '_CONTIENE_CATALOGO',
+
+                            },
+
+                        }  # fin alternativas de _CONTIENE_CATALOGO CDU
+                    },
+
+                }  # fin cdus de _TODOS proceso
+            },
+
+        }  # fin procesos de Pre Venta
+    },
+
+    # ========================================================================
+    # POST VENTA (Marketplace)
+    # ========================================================================
+    'Post Venta': {
+        'driver_estandar_ref': 'orders_by_site / COUNT(DISTINCT ORD_ORDER_ID)',
+        'procesos': {
+
+            # ────────────────────────────────────────────────────────────────
+            # PROCESO: Facturación
+            # ────────────────────────────────────────────────────────────────
+            'Facturación': {
+                'cdus': {
+
+                    # ════════════════════════════════════════════════════════
+                    # CDU: _TODOS
+                    # ════════════════════════════════════════════════════════
+                    '_TODOS': {
+                        'alternativas': {
+
+                            'facturas_emitidas': {
+                                'label': 'Facturas Emitidas (BT_FCT_DOCUMENTS)',
+                                'description': (
+                                    'Total de facturas únicas emitidas por Mercado Libre al '
+                                    'seller en el período. Incluye cargos de ADS, comisiones, '
+                                    'cargos por venta, cargos por Mi Página y otros servicios. '
+                                    'Se cuenta cada DOC_ID único con DOC_TYPE = BILL. '
+                                    'Permite calcular el CR de Facturación sobre el volumen real '
+                                    'de facturas generadas, que es el denominador más representativo '
+                                    'para este proceso: a más facturas emitidas, mayor probabilidad '
+                                    'de contacto por dudas o reclamos sobre conceptos facturados.'
+                                ),
+                                'tabla_fuente': 'meli-bi-data.WHOWNER.BT_FCT_DOCUMENTS',
+                                'fecha_field': 'DATE_CREATED',
+                                'count_expression': 'COUNT(DISTINCT B.DOC_ID)',
+                                'filter_by_site': True,
+                                'site_filter_type': 'direct',
+                                'sites_disponibles': ['MLA', 'MLB', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE'],
+                                'notas': (
+                                    'Útil para calcular el CR del proceso de Facturación sobre '
+                                    'el volumen real de facturas emitidas en lugar de órdenes del site. '
+                                    'El denominador de órdenes no es representativo para Facturación: '
+                                    'un seller puede tener muchas órdenes pero pocas facturas, o '
+                                    'viceversa (ej: cargos de ADS no están ligados a órdenes). '
+                                    'La correlación correcta es: más facturas → más contactos por '
+                                    'conceptos no entendidos o reclamos. '
+                                    'NOTA: Solo se consideran documentos con DOC_TYPE = BILL. '
+                                    'Excluir MLV si aplica. '
+                                    'RECOMENDACIÓN: Siempre proponer este análisis cuando se analiza '
+                                    'el proceso de Facturación dentro de Post Venta.'
+                                ),
+
+                                # ────────────────────────────────────────────
+                                # FILTROS BASE (siempre aplicados)
+                                # ────────────────────────────────────────────
+                                'filtros_base': {
+                                    'DOC_TYPE': "= 'BILL' (solo facturas)",
+                                },
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER: Conteo de facturas P1/P2
+                                # ────────────────────────────────────────────
+                                'query_driver': """
+SELECT
+    COUNT(DISTINCT CASE
+        WHEN DATE(B.DATE_CREATED) BETWEEN '{p1_start}' AND '{p1_end}'
+        THEN B.DOC_ID
+    END) AS DRV_P1,
+    COUNT(DISTINCT CASE
+        WHEN DATE(B.DATE_CREATED) BETWEEN '{p2_start}' AND '{p2_end}'
+        THEN B.DOC_ID
+    END) AS DRV_P2
+FROM `meli-bi-data.WHOWNER.BT_FCT_DOCUMENTS` B
+WHERE DATE(B.DATE_CREATED) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND B.DOC_TYPE = 'BILL'
+    AND B.SIT_SITE_ID {site_filter}
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DRIVER SEMANAL: Para gráfico de tendencia
+                                # ────────────────────────────────────────────
+                                'query_driver_semanal': """
+SELECT
+    DATE_TRUNC(DATE(B.DATE_CREATED), WEEK(MONDAY)) AS SEMANA,
+    COUNT(DISTINCT B.DOC_ID) AS DRIVER
+FROM `meli-bi-data.WHOWNER.BT_FCT_DOCUMENTS` B
+WHERE DATE(B.DATE_CREATED) BETWEEN DATE_SUB('{p2_end}', INTERVAL 25 WEEK) AND '{p2_end}'
+    AND B.DOC_TYPE = 'BILL'
+    AND B.SIT_SITE_ID {site_filter}
+GROUP BY SEMANA
+ORDER BY SEMANA
+""",
+
+                                # ────────────────────────────────────────────
+                                # QUERY DETALLE: Con clasificaciones completas
+                                # ────────────────────────────────────────────
+                                'query_detalle': """
+SELECT
+    DATE_TRUNC(DATE(B.DATE_CREATED), MONTH) AS MES,
+    B.SIT_SITE_ID,
+    B.STATUS,
+    COUNT(DISTINCT B.CUS_CUST_ID) AS CANT_CLIENTES,
+    COUNT(DISTINCT B.DOC_ID) AS CANT_FACTURAS,
+    SUM(B.AMOUNT) AS BILL_AMT
+FROM `meli-bi-data.WHOWNER.BT_FCT_DOCUMENTS` B
+WHERE DATE(B.DATE_CREATED) BETWEEN '{p1_start}' AND '{p2_end}'
+    AND B.DOC_TYPE = 'BILL'
+    AND B.SIT_SITE_ID {site_filter}
+GROUP BY ALL
+ORDER BY MES, CANT_FACTURAS DESC
+""",
+
+                                # ────────────────────────────────────────────
+                                # CLASIFICACIONES DISPONIBLES
+                                # ────────────────────────────────────────────
+                                'clasificaciones': {
+                                    'STATUS': {
+                                        'label': 'Estado de la Factura',
+                                        'valores': [],
+                                        'detalle': {
+                                            'approved': 'Factura aprobada/emitida',
+                                            'pending': 'Factura pendiente',
+                                            'cancelled': 'Factura cancelada',
+                                        }
+                                    },
+                                },
+
+                            },
+
+                        }  # fin alternativas de _TODOS CDU
+                    },
+
+                }  # fin cdus de Facturación
+            },
+
+        }  # fin procesos de Post Venta
+    },
+
 }
 
 
@@ -1078,6 +1506,73 @@ DRIVER_ALT_ALIASES = {
     'sellers with stock': 'sellers_con_stock',
     'cantidad de sellers': 'sellers_con_stock',
     'qty sellers': 'sellers_con_stock',
+
+    # Pre Venta
+    'pre_venta': 'Pre Venta',
+    'PRE_VENTA': 'Pre Venta',
+    'Pre Venta': 'Pre Venta',
+    'pre venta': 'Pre Venta',
+
+    # CDU _CONTIENE_CATALOGO
+    '_contiene_catalogo': '_CONTIENE_CATALOGO',
+    '_CONTIENE_CATALOGO': '_CONTIENE_CATALOGO',
+    'catalogo': '_CONTIENE_CATALOGO',
+    'catálogo': '_CONTIENE_CATALOGO',
+    'CATALOGO': '_CONTIENE_CATALOGO',
+    'CATÁLOGO': '_CONTIENE_CATALOGO',
+    'sub cdu catalogo': '_CONTIENE_CATALOGO',
+    'sub_cdu_catalogo': '_CONTIENE_CATALOGO',
+
+    # Driver items_buybox
+    'items_buybox': 'items_buybox',
+    'items buybox': 'items_buybox',
+    'ítems en buybox': 'items_buybox',
+    'items en buybox': 'items_buybox',
+    'buybox items': 'items_buybox',
+    'buybox': 'items_buybox',
+    'BUYBOX': 'items_buybox',
+    'ite_item_id': 'items_buybox',
+    'cantidad de items buybox': 'items_buybox',
+    'item count': 'items_buybox',
+
+    # Driver sellers_activos
+    'sellers_activos': 'sellers_activos',
+    'sellers activos': 'sellers_activos',
+    'sellers activos por mes': 'sellers_activos',
+    'active sellers': 'sellers_activos',
+    'sellers': 'sellers_activos',
+    'SELLERS': 'sellers_activos',
+    'ord_seller_id': 'sellers_activos',
+    'cantidad de sellers activos': 'sellers_activos',
+    'qty sellers activos': 'sellers_activos',
+
+    # Post Venta
+    'post_venta': 'Post Venta',
+    'POST_VENTA': 'Post Venta',
+    'Post Venta': 'Post Venta',
+    'post venta': 'Post Venta',
+
+    # Proceso Facturación
+    'facturacion': 'Facturación',
+    'Facturacion': 'Facturación',
+    'FACTURACION': 'Facturación',
+    'Facturación': 'Facturación',
+    'facturación': 'Facturación',
+    'billing': 'Facturación',
+    'BILLING': 'Facturación',
+
+    # Driver facturas_emitidas
+    'facturas_emitidas': 'facturas_emitidas',
+    'facturas emitidas': 'facturas_emitidas',
+    'facturas': 'facturas_emitidas',
+    'FACTURAS': 'facturas_emitidas',
+    'cant_facturas': 'facturas_emitidas',
+    'cantidad de facturas': 'facturas_emitidas',
+    'qty facturas': 'facturas_emitidas',
+    'doc_id': 'facturas_emitidas',
+    'DOC_ID': 'facturas_emitidas',
+    'bills': 'facturas_emitidas',
+    'bill count': 'facturas_emitidas',
 }
 
 
@@ -1423,6 +1918,9 @@ for d in todos:
 # FBM Sellers > (Todos los procesos) > *INBOUND* (patrón) > Inbounds (Cantidad de INBOUND_ID)
 # FBM Sellers > FBM-Retiro de Stock > (Todos los CDUs) > Requests de Retiro
 # FBM Sellers > FBM-Retiro de Stock > (Todos los CDUs) > Sellers con Stock
+# Pre Venta > (Todos los procesos) > (Todos los CDUs) > Sellers Activos por Mes
+# Pre Venta > (Todos los procesos) > *CATALOGO* (patrón Sub CDU) > Ítems en BuyBox
+# Post Venta > Facturación > (Todos los CDUs) > Facturas Emitidas (BT_FCT_DOCUMENTS)
 
 # ── EJEMPLO 2: Driver con site_filter directo (paradas_colecta) ──
 query = build_driver_query(
@@ -1471,4 +1969,47 @@ weekly = build_weekly_query(
     site='MLM'
 )
 # Genera: ... AND i.warehouse_id LIKE 'MX%'
+
+# ── EJEMPLO 6: Driver de Sellers Activos (Pre Venta > todos los procesos) ──
+query = build_driver_query(
+    commerce_group='Pre Venta',
+    proceso='_TODOS',
+    cdu='_TODOS',
+    driver_key='sellers_activos',
+    p1_start='2025-12-01', p1_end='2025-12-31',
+    p2_start='2026-01-01', p2_end='2026-01-31',
+    site='MLA'
+)
+# Genera: ... AND ORD.SIT_SITE_ID = 'MLA'
+# Útil para procesos: Gestión de Publicaciones, Potenciar Ventas,
+# Altas de publicar, Denuncia de Usuarios.
+# NO usar para Afiliados.
+
+# ── EJEMPLO 7: Driver Ítems en BuyBox (Pre Venta > Sub CDUs con Catálogo) ──
+query = build_driver_query(
+    commerce_group='Pre Venta',
+    proceso='_TODOS',
+    cdu='_CONTIENE_CATALOGO',
+    driver_key='items_buybox',
+    p1_start='2025-12-01', p1_end='2025-12-31',
+    p2_start='2026-01-01', p2_end='2026-01-31',
+    site='MLA'
+)
+# Genera: ... AND bb.sit_site_id = 'MLA'
+# ⚠️ Requiere campo SUB_CDU en la tabla base de CR para filtrar incoming
+# por los 4 Sub CDUs que contienen "Catálogo".
+
+# ── EJEMPLO 8: Driver de Facturas Emitidas (Post Venta > Facturación) ──
+query = build_driver_query(
+    commerce_group='Post Venta',
+    proceso='Facturación',
+    cdu='_TODOS',
+    driver_key='facturas_emitidas',
+    p1_start='2025-12-01', p1_end='2025-12-31',
+    p2_start='2026-01-01', p2_end='2026-01-31',
+    site='MLA'
+)
+# Genera: ... AND B.SIT_SITE_ID = 'MLA'
+# Útil cuando el análisis de CR del proceso Facturación muestra variación
+# y se quiere normalizar incoming sobre facturas emitidas en lugar de órdenes.
 """

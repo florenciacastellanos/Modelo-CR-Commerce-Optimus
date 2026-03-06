@@ -7,6 +7,7 @@ para generar filtros SQL dinámicos según site individual o grupo.
 Grupos disponibles:
   - ROLA: Todos los sites EXCEPTO MLA, MLB y MLM → MLC, MCO, MEC, MLU, MPE
   - HSP:  Todos los sites EXCEPTO MLB → MLA, MLC, MCO, MEC, MLM, MLU, MPE
+  - ALL:  Todos los sites (cross-site) → MLA, MLB, MLC, MCO, MEC, MLM, MLU, MPE
 
 Uso:
   from config.site_groups import resolve_site_sql, get_site_list, is_site_group
@@ -29,6 +30,7 @@ VALID_SITES = ['MLA', 'MLB', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE']
 SITE_GROUPS = {
     'ROLA': ['MLC', 'MCO', 'MEC', 'MLU', 'MPE'],        # Rest of Latin America (excl MLA, MLB, MLM)
     'HSP':  ['MLA', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE'],  # Hispanic (excl MLB)
+    'ALL':  ['MLA', 'MLB', 'MLC', 'MCO', 'MEC', 'MLM', 'MLU', 'MPE'],  # Cross-site (todos los sites)
 }
 
 

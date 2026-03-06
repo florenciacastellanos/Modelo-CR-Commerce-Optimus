@@ -46,7 +46,23 @@ DRIVER_CONFIG = {
         'filter_by_site': False,
         'description': 'Órdenes totales GLOBALES (sin filtro site)'
     },
-    
+    'PCF_COMPRADOR': {
+        'type': 'orders_global',
+        'table': 'BT_ORD_ORDERS',
+        'date_field': 'ORD_CLOSED_DT',
+        'count_expression': 'COUNT(DISTINCT ORD.ORD_ORDER_ID)',
+        'filter_by_site': False,
+        'description': 'Órdenes totales GLOBALES (sin filtro site)'
+    },
+    'PCF_VENDEDOR': {
+        'type': 'orders_global',
+        'table': 'BT_ORD_ORDERS',
+        'date_field': 'ORD_CLOSED_DT',
+        'count_expression': 'COUNT(DISTINCT ORD.ORD_ORDER_ID)',
+        'filter_by_site': False,
+        'description': 'Órdenes totales GLOBALES (sin filtro site)'
+    },
+
     # ========================================
     # SHIPPING - Drivers específicos GLOBALES
     # ========================================
@@ -187,7 +203,13 @@ COMMERCE_GROUP_ALIASES = {
     'PDD': 'PDD',
     'pnr': 'PNR',
     'PNR': 'PNR',
-    
+    'pcf_comprador': 'PCF_COMPRADOR',
+    'PCF_COMPRADOR': 'PCF_COMPRADOR',
+    'PCF Comprador': 'PCF_COMPRADOR',
+    'pcf_vendedor': 'PCF_VENDEDOR',
+    'PCF_VENDEDOR': 'PCF_VENDEDOR',
+    'PCF Vendedor': 'PCF_VENDEDOR',
+
     # Shipping
     'me_distribucion': 'ME Distribución',
     'ME_DISTRIBUCION': 'ME Distribución',

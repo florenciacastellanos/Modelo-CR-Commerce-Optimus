@@ -40,6 +40,7 @@ WITH BASE_CONTACTS AS (
         C.REASON_DETAIL_GROUP_REPORTING,
         C.CLA_REASON_DETAIL,
         C.CDU,
+        C.SUB_CDU,  -- Sub CDU (requerido para driver alternativo items_buybox en Pre Venta > Catálogo)
         
         -- ─────────────────────────────────────────────────────────────────────
         -- VERTICAL AND DOMAIN (⚠️ Currently NULL - table not available)

@@ -110,6 +110,9 @@ from config.drivers_mapping import get_driver_config, get_driver_description
 # Importar soporte para agrupaciones de sites (ROLA, HSP)
 from config.site_groups import resolve_site_sql, get_site_list, is_site_group, get_site_display_name
 
+# Importar módulo de contingencias operacionales (Google Sheets)
+from utils.contingencias import cargar_contingencias, generar_contingencias_html
+
 # ========================================
 # CONFIGURACIÓN DE ANÁLISIS LLM
 # ========================================
@@ -563,6 +566,8 @@ def esperar_analisis_conversaciones(json_path, elementos_priorizados, timeout_se
     print(f"""
 Analiza las conversaciones de {site} - {commerce_group} SEPARADAS POR PERÍODO:
 
+**🌐 IDIOMA:** Responde SIEMPRE en español. Si las conversaciones están en otro idioma (português para MLB, inglés u otro), traduce los textos de las citas al español en el campo "texto" antes de incluirlas en el JSON.
+
 **PASO 1 - Análisis {p1_label}:**
 1. Lee SOLO los CSVs con sufijo `_p1_{p1_mes}.csv` 
 2. Para cada elemento, identifica causas raíz, porcentajes, sentimiento y citas
@@ -749,6 +754,7 @@ def detectar_dimension_muestreo(aperturas_list):
         'SOURCE_ID': 5,
         'ENVIRONMENT': 4,
         'TIPIFICACION': 3,
+        'SUB_CDU': 2,  # Sub CDU — más granular que CDU, mismo nivel de jerarquía
         'CDU': 2,
         'PROCESO': 1
     }
@@ -785,12 +791,16 @@ parser.add_argument('--process-name', default=None,
 parser.add_argument('--output-dir', default='output', help='Directorio de salida')
 parser.add_argument('--open-report', action='store_true', help='Abrir reporte al finalizar')
 parser.add_argument('--skip-conversations', action='store_true', help='Saltar análisis de conversaciones')
+parser.add_argument('--from-cache', action='store_true',
+                   help='Regenerar HTML desde CSVs/JSONs cacheados sin ejecutar BigQuery')
 parser.add_argument('--export-only', action='store_true',
                    help='Solo exportar CSVs de conversaciones sin generar HTML (para análisis con Cursor AI)')
 parser.add_argument('--muestreo-dimension', default=None,
                    help='Dimensión para muestreo de conversaciones (auto-detecta la más granular si no se especifica)')
 parser.add_argument('--filter-driver-by-site', action='store_true', default=False,
                    help='[OVERRIDE] Filtrar driver de Shipping por site (no estándar, requiere confirmación)')
+parser.add_argument('--skip-contingencias', action='store_true', default=False,
+                   help='Omitir carga de contingencias operacionales desde Google Sheets')
 
 args = parser.parse_args()
 
@@ -875,6 +885,7 @@ if args.commerce_group.upper() in SHIPPING_COMMERCE_GROUPS and args.filter_drive
 FIELD_MAPPING = {
     'PROCESO': 'C.PROCESS_NAME',
     'CDU': 'C.CDU',
+    'SUB_CDU': 'C.SUB_CDU',  # Sub CDU — requerido para driver alternativo items_buybox (Pre Venta > Catálogo)
     'TIPIFICACION': 'C.REASON_DETAIL_GROUP_REPORTING',
     'ENVIRONMENT': 'C.ENVIRONMENT',
     'CLA_REASON_DETAIL': 'C.CLA_REASON_DETAIL',
@@ -962,15 +973,21 @@ COMMERCE_GROUP_FILTERS = {
         END
     """,
     'FBM Sellers': """
-        CASE 
+        CASE
             WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%FBM Sellers%') THEN 'FBM Sellers'
-            ELSE 'OTRO' 
+            ELSE 'OTRO'
         END
     """,
     'FBM_SELLERS': """
-        CASE 
+        CASE
             WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%FBM Sellers%') THEN 'FBM_SELLERS'
-            ELSE 'OTRO' 
+            ELSE 'OTRO'
+        END
+    """,
+    'Pre Venta': """
+        CASE
+            WHEN C.PROCESS_PROBLEMATIC_REPORTING LIKE ('%PreVenta%') THEN 'Pre Venta'
+            ELSE 'OTRO'
         END
     """
 }
@@ -998,12 +1015,16 @@ color_config = COLORS.get(args.commerce_group, {'primary': '#00a650', 'badge': '
 # ========================================
 
 print("[INIT] Inicializando cliente BigQuery...")
-try:
-    client = Client()
-    print("[OK] Cliente BigQuery inicializado\n")
-except Exception as e:
-    print(f"[ERROR] No se pudo inicializar BigQuery: {e}")
-    sys.exit(1)
+if args.from_cache:
+    client = None
+    print("[FROM-CACHE] Modo caché activo — BigQuery deshabilitado\n")
+else:
+    try:
+        client = Client()
+        print("[OK] Cliente BigQuery inicializado\n")
+    except Exception as e:
+        print(f"[ERROR] No se pudo inicializar BigQuery: {e}")
+        sys.exit(1)
 
 # Inicializar lista de queries ejecutadas
 queries_ejecutadas = []
@@ -1152,25 +1173,57 @@ def ejecutar_query_eventos_fallback(site, p1_start, p1_end, p2_start, p2_end, co
         GROUP BY 1,2,3,4
     ),
     totales AS (
-        SELECT 
-            CASE 
+        SELECT
+            CASE
                 WHEN CONTACT_DATE_ID <= '{p1_end}' THEN 'P1'
                 ELSE 'P2'
             END as periodo,
             COUNT(DISTINCT CAS_CASE_ID) as total
         FROM incoming_base
         GROUP BY 1
+    ),
+    ordenes_por_evento AS (
+        -- Órdenes cuyo ORD_CLOSED_DT cae en el evento — denominador de CR_Evento
+        -- Sin filtro de site ni commerce group (driver global, igual que las KPI cards)
+        SELECT
+            e.EVENT_NAME,
+            COUNT(DISTINCT ORD.ORD_ORDER_ID) as ordenes_evento
+        FROM eventos e
+        JOIN `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
+            ON DATE(ORD.ORD_CLOSED_DT) BETWEEN e.fecha_inicio AND e.fecha_fin
+        WHERE ORD.ORD_CLOSED_DT BETWEEN '{p1_start}' AND '{p2_end}'
+        GROUP BY 1
+    ),
+    driver_por_periodo AS (
+        -- Órdenes totales por período — denominador de CR_Global
+        -- Sin filtro de site (driver global para PDD/PNR, alineado con KPI cards)
+        SELECT
+            CASE
+                WHEN DATE(ORD.ORD_CLOSED_DT) <= '{p1_end}' THEN 'P1'
+                ELSE 'P2'
+            END as periodo,
+            COUNT(DISTINCT ORD.ORD_ORDER_ID) as total_ordenes
+        FROM `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
+        WHERE ORD.ORD_CLOSED_DT BETWEEN '{p1_start}' AND '{p2_end}'
+        GROUP BY 1
     )
-    SELECT 
+    SELECT
         c.EVENT_NAME,
         c.fecha_inicio,
         c.fecha_fin,
         c.periodo,
         c.casos,
         t.total as casos_totales,
-        ROUND(c.casos * 100.0 / NULLIF(t.total, 0), 2) as porcentaje
+        ROUND(c.casos * 100.0 / NULLIF(t.total, 0), 2) as porcentaje,
+        -- CR_Evento: contactos del evento / órdenes del evento
+        ROUND(c.casos * 100.0 / NULLIF(oe.ordenes_evento, 0), 4) as cr_evento,
+        -- CR_Global: incoming del período / órdenes del período (= CR de las KPI cards)
+        ROUND(t.total * 100.0 / NULLIF(dp.total_ordenes, 0), 4) as cr_global,
+        oe.ordenes_evento
     FROM casos_por_evento c
     JOIN totales t ON c.periodo = t.periodo
+    LEFT JOIN ordenes_por_evento oe ON c.EVENT_NAME = oe.EVENT_NAME
+    JOIN driver_por_periodo dp ON c.periodo = dp.periodo
     ORDER BY c.casos DESC
     """
     return query
@@ -1294,7 +1347,10 @@ if not eventos_from_hard_metrics:
                     'fecha_inicio': str(row['fecha_inicio']),
                     'fecha_fin': str(row['fecha_fin']),
                     'casos': int(row['casos']),
-                    'porcentaje': float(row['porcentaje'])
+                    'porcentaje': float(row['porcentaje']),
+                    'cr_evento': float(row['cr_evento']) if 'cr_evento' in row and row['cr_evento'] is not None else 0,
+                    'cr_global': float(row['cr_global']) if 'cr_global' in row and row['cr_global'] is not None else 0,
+                    'ordenes_evento': int(row['ordenes_evento']) if 'ordenes_evento' in row and row['ordenes_evento'] is not None else 0,
                 }
                 
                 if periodo == 'P1':
@@ -1322,20 +1378,34 @@ all_eventos = set(list(eventos_comerciales_p1.keys()) + list(eventos_comerciales
 for evento_key in all_eventos:
     p1_data = eventos_comerciales_p1.get(evento_key, {'casos': 0, 'porcentaje': 0})
     p2_data = eventos_comerciales_p2.get(evento_key, {'casos': 0, 'porcentaje': 0})
-    
+
     # Usar datos del período que tenga info de fechas
     base_data = p1_data if p1_data.get('fecha_inicio') else p2_data
-    
+
+    # CR_Evento: recalcular combinando P1+P2 sobre las mismas órdenes del evento
+    # Una orden de evento puede generar contactos en P1 y/o P2 — ambos deben sumarse
+    ordenes_evento = max(p1_data.get('ordenes_evento', 0), p2_data.get('ordenes_evento', 0))
+    casos_total_evento = p1_data.get('casos', 0) + p2_data.get('casos', 0)
+    cr_evento = round(casos_total_evento * 100.0 / ordenes_evento, 4) if ordenes_evento > 0 else 0
+
+    # CR_Global: baseline del período más reciente (P2) para comparar contra CR_Evento
+    cr_global_p2 = p2_data.get('cr_global', 0)
+    cr_global_p1 = p1_data.get('cr_global', 0)
+    cr_global_ref = cr_global_p2 if cr_global_p2 > 0 else cr_global_p1
+
     eventos_comerciales[evento_key] = {
         'nombre': evento_key,
         'fecha_inicio': base_data.get('fecha_inicio', ''),
         'fecha_fin': base_data.get('fecha_fin', ''),
         'casos_p1': p1_data.get('casos', 0),
         'casos_p2': p2_data.get('casos', 0),
-        'casos_total': p1_data.get('casos', 0) + p2_data.get('casos', 0),
+        'casos_total': casos_total_evento,
         'porcentaje_p1': p1_data.get('porcentaje', 0),
         'porcentaje_p2': p2_data.get('porcentaje', 0),
-        'delta_casos': p2_data.get('casos', 0) - p1_data.get('casos', 0)
+        'delta_casos': p2_data.get('casos', 0) - p1_data.get('casos', 0),
+        'cr_evento': cr_evento,
+        'cr_global': cr_global_ref,
+        'ordenes_evento': ordenes_evento,
     }
 
 # Calcular totales globales
@@ -1387,6 +1457,8 @@ if len(eventos_comerciales) > 0:
                         <th>Casos {p2_label_eventos}</th>
                         <th>Δ Casos</th>
                         <th>% Correlación</th>
+                        <th title="CR = (contactos con orden en evento) / (total órdenes del evento) × 100. Rojo = evento genera más contactos por orden que el promedio del período.">CR Evento</th>
+                        <th title="CR baseline del período analizado (P2). Equivale al valor en las KPI cards.">CR Global ({p2_label_eventos})</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1409,7 +1481,24 @@ if len(eventos_comerciales) > 0:
             
             # Porcentaje promedio
             pct_avg = (evento_data['porcentaje_p1'] + evento_data['porcentaje_p2']) / 2 if evento_data['porcentaje_p1'] > 0 and evento_data['porcentaje_p2'] > 0 else max(evento_data['porcentaje_p1'], evento_data['porcentaje_p2'])
-            
+
+            # CR Evento vs CR Global: badge de color según lift
+            cr_evento = evento_data.get('cr_evento', 0)
+            cr_global = evento_data.get('cr_global', 0)
+            if cr_evento > 0 and cr_global > 0:
+                if cr_evento > cr_global * 1.05:
+                    cr_badge = f'<span class="badge badge-negative">{cr_evento:.4f} pp</span>'
+                elif cr_evento < cr_global * 0.95:
+                    cr_badge = f'<span class="badge badge-positive">{cr_evento:.4f} pp</span>'
+                else:
+                    cr_badge = f'<span>{cr_evento:.4f} pp</span>'
+            elif cr_evento > 0:
+                cr_badge = f'<span>{cr_evento:.4f} pp</span>'
+            else:
+                cr_badge = '<span style="color:#999">N/D</span>'
+
+            cr_global_text = f'{cr_global:.4f} pp' if cr_global > 0 else 'N/D'
+
             eventos_html += f"""
                     <tr>
                         <td class="evento-nombre"><span class="evento-icon">{icon}</span>{evento_data['nombre']}</td>
@@ -1418,6 +1507,8 @@ if len(eventos_comerciales) > 0:
                         <td class="number">{evento_data['casos_p2']:,}</td>
                         <td class="number"><span class="badge {badge_class}">{delta_text}</span></td>
                         <td class="number">{pct_avg:.1f}%</td>
+                        <td class="number">{cr_badge}</td>
+                        <td class="number">{cr_global_text}</td>
                     </tr>
             """
         
@@ -1588,6 +1679,60 @@ if len(feriados_data) > 0:
     print(f"[OK] HTML de feriados generado con {len(feriados_data)} registros")
 else:
     print("[INFO] Sin feriados para mostrar en el reporte")
+
+print()
+
+# ========================================
+# CONTINGENCIAS OPERACIONALES (v6.4.11)
+# ========================================
+
+print("="*80)
+print("CONTINGENCIAS OPERACIONALES")
+print("="*80 + "\n")
+
+contingencias_html = ""
+contingencias_data = {'total': 0}
+
+try:
+    contingencias_data = cargar_contingencias(
+        site=args.site,
+        p1_start=args.p1_start, p1_end=args.p1_end,
+        p2_start=args.p2_start, p2_end=args.p2_end,
+        skip=args.skip_contingencias,
+    )
+
+    if contingencias_data['total'] > 0:
+        contingencias_html = generar_contingencias_html(
+            contingencias_data,
+            p1_label=p1_label_eventos,
+            p2_label=p2_label_eventos
+        )
+        print(f"[OK] HTML de contingencias generado con {contingencias_data['total']} registros")
+
+        # Exportar contexto para análisis conversacional
+        try:
+            _cont_output_dir = Path(args.output_dir)
+            _cont_output_dir.mkdir(parents=True, exist_ok=True)
+            context_path = _cont_output_dir / f"context_contingencias_{args.site.lower()}_{args.commerce_group.lower()}_{p1_start_dt.strftime('%Y%m')}_{p2_start_dt.strftime('%Y%m')}.json"
+            with open(context_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'tipo': 'contingencias_operacionales',
+                    'total': contingencias_data['total'],
+                    'contingencias': (contingencias_data['contingencias_p1']
+                                      + contingencias_data['contingencias_p2']
+                                      + contingencias_data['contingencias_ambos']),
+                    'nota': 'Usar como contexto adicional al analizar conversaciones. '
+                            'Las contingencias pueden explicar patrones de contacto anómalos.',
+                }, f, indent=2, ensure_ascii=False)
+            print(f"[OK] Contexto de contingencias exportado: {context_path.name}")
+        except Exception as e_ctx:
+            print(f"[WARNING] No se pudo exportar contexto de contingencias: {e_ctx}")
+    else:
+        reason = contingencias_data.get('error', 'sin datos')
+        print(f"[INFO] Sin contingencias para mostrar ({reason})")
+except Exception as e:
+    print(f"[WARNING] Error al cargar contingencias: {e}")
+    print("[INFO] El reporte continuará sin sección de contingencias")
 
 print()
 
@@ -1835,8 +1980,8 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
         print(
             f"  {row['site']:<8} \u2502 {row['inc_p1']:>10,} \u2502 {row['inc_p2']:>10,} \u2502 "
             f"{row['var_inc']:>+10,} \u2502 {row['var_inc_pct']:>+7.1f}% \u2502 "
-            f"{row['cr_p1']:>10.4f} \u2502 {row['cr_p2']:>10.4f} \u2502 "
-            f"{row['var_cr']:>+10.4f} \u2502 {row['contrib_pct']:>8.1f}%"
+            f"{row['cr_p1']:>10.3f} \u2502 {row['cr_p2']:>10.3f} \u2502 "
+            f"{row['var_cr']:>+10.3f} \u2502 {row['contrib_pct']:>8.1f}%"
         )
     
     # Separador antes del total
@@ -1846,8 +1991,8 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
     print(
         f"  {total_row['site']:<8} \u2502 {total_row['inc_p1']:>10,} \u2502 {total_row['inc_p2']:>10,} \u2502 "
         f"{total_row['var_inc']:>+10,} \u2502 {total_row['var_inc_pct']:>+7.1f}% \u2502 "
-        f"{total_row['cr_p1']:>10.4f} \u2502 {total_row['cr_p2']:>10.4f} \u2502 "
-        f"{total_row['var_cr']:>+10.4f} \u2502 {total_row['contrib_pct']:>8.1f}%"
+        f"{total_row['cr_p1']:>10.3f} \u2502 {total_row['cr_p2']:>10.3f} \u2502 "
+        f"{total_row['var_cr']:>+10.3f} \u2502 {total_row['contrib_pct']:>8.1f}%"
     )
     
     print(line_bot)
@@ -1900,9 +2045,9 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
                         <td class="number">{row['inc_p2']:,.0f}</td>
                         <td class="number {_var_inc_cls}">{row['var_inc']:+,.0f}</td>
                         <td class="number {_var_inc_cls}">{row['var_inc_pct']:+.1f}%</td>
-                        <td class="number">{row['cr_p1']:.4f}</td>
-                        <td class="number">{row['cr_p2']:.4f}</td>
-                        <td class="number {_var_cr_cls}">{row['var_cr']:+.4f}</td>
+                        <td class="number">{row['cr_p1']:.3f}</td>
+                        <td class="number">{row['cr_p2']:.3f}</td>
+                        <td class="number {_var_cr_cls}">{row['var_cr']:+.3f}</td>
                         <td class="number">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
                                 <span>{abs(row['contrib_pct']):.1f}%</span>
@@ -1922,20 +2067,20 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
                         <td class="number">{total_row['inc_p2']:,.0f}</td>
                         <td class="number">{total_row['var_inc']:+,.0f}</td>
                         <td class="number">{total_row['var_inc_pct']:+.1f}%</td>
-                        <td class="number">{total_row['cr_p1']:.4f}</td>
-                        <td class="number">{total_row['cr_p2']:.4f}</td>
-                        <td class="number">{total_row['var_cr']:+.4f}</td>
+                        <td class="number">{total_row['cr_p1']:.3f}</td>
+                        <td class="number">{total_row['cr_p2']:.3f}</td>
+                        <td class="number">{total_row['var_cr']:+.3f}</td>
                         <td class="number">100.0%</td>
                     </tr>"""
         
         # Determinar dirección general del CR para el highlight
         if total_row['var_cr'] < 0:
             _highlight_icon = '\U0001F4C9'  # chart decreasing = mejora
-            _highlight_text = f"CR mejoró <strong>{total_row['var_cr']:+.4f} pp</strong> ({total_row['var_inc_pct']:+.1f}% incoming)"
+            _highlight_text = f"CR mejoró <strong>{total_row['var_cr']:+.3f} pp</strong> ({total_row['var_inc_pct']:+.1f}% incoming)"
             _highlight_border = '#00A650'
         elif total_row['var_cr'] > 0:
             _highlight_icon = '\U0001F4C8'  # chart increasing = empeora
-            _highlight_text = f"CR empeoró <strong>{total_row['var_cr']:+.4f} pp</strong> ({total_row['var_inc_pct']:+.1f}% incoming)"
+            _highlight_text = f"CR empeoró <strong>{total_row['var_cr']:+.3f} pp</strong> ({total_row['var_inc_pct']:+.1f}% incoming)"
             _highlight_border = '#F23D4F'
         else:
             _highlight_icon = '\u2796'  # minus = sin cambio
@@ -1953,7 +2098,7 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
             <h2>\U0001F30E Vista Cross-Site | {commerce_group}{_proceso_html}</h2>
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:#F5F5F5;border-radius:8px;border-left:4px solid {_highlight_border};">
                 <span style="font-size:24px;">{_highlight_icon}</span>
-                <span style="font-size:14px;color:#333;">{_highlight_text} &mdash; Mayor contribución: <strong>{_top_flag} {_top_site['site']}</strong> ({_top_direction} {abs(_top_site['var_cr']):.4f} pp, {abs(_top_site['contrib_pct']):.1f}% del total)</span>
+                <span style="font-size:14px;color:#333;">{_highlight_text} &mdash; Mayor contribución: <strong>{_top_flag} {_top_site['site']}</strong> ({_top_direction} {abs(_top_site['var_cr']):.3f} pp, {abs(_top_site['contrib_pct']):.1f}% del total)</span>
             </div>
             <table>
                 <thead>
@@ -1986,17 +2131,18 @@ def generar_cuadro_cross_site(client, commerce_group, p1_start, p1_end, p2_start
 
 
 # Ejecutar cuadro cross-site (aditivo, no modifica el flujo principal)
-try:
-    generar_cuadro_cross_site(
-        client, 
-        args.commerce_group, 
-        args.p1_start, args.p1_end, 
-        args.p2_start, args.p2_end, 
-        args.process_name
-    )
-except Exception as e:
-    print(f"[CROSS-SITE] Error inesperado: {e}")
-    print("[CROSS-SITE] Continuando con flujo normal...\n")
+if not args.from_cache:
+    try:
+        generar_cuadro_cross_site(
+            client,
+            args.commerce_group,
+            args.p1_start, args.p1_end,
+            args.p2_start, args.p2_end,
+            args.process_name
+        )
+    except Exception as e:
+        print(f"[CROSS-SITE] Error inesperado: {e}")
+        print("[CROSS-SITE] Continuando con flujo normal...\n")
 
 # ========================================
 # PASO 1: CALCULAR MÉTRICAS CONSOLIDADAS
@@ -2012,17 +2158,56 @@ if not commerce_filter:
     print(f"[ERROR] Commerce group '{args.commerce_group}' no tiene filtro definido")
     sys.exit(1)
 
-print(f"[QUERY] Calculando incoming total...")
-
 # Agregar filtro de proceso si está especificado
 process_filter = ""
 if args.process_name:
-    # Escapar comillas simples en el nombre del proceso
     process_name_escaped = args.process_name.replace("'", "''")
     process_filter = f"AND C.PROCESS_NAME LIKE '%{process_name_escaped}%'"
     print(f"[INFO] Filtrando por proceso: {args.process_name}")
 
-query_incoming_total = f"""
+# Obtener configuración de driver para este commerce group (necesaria en ambos modos)
+driver_config = get_driver_config(args.commerce_group)
+driver_desc = get_driver_description(args.commerce_group, args.site)
+if driver_config['type'] == 'shipping_drivers' and args.filter_driver_by_site:
+    driver_desc = f"{driver_desc} ({args.site} únicamente) ⚠️ MODO OVERRIDE"
+
+print(f"[DRIVER] Commerce Group: {args.commerce_group}")
+print(f"[DRIVER] Tipo: {driver_config['type']}")
+print(f"[DRIVER] Tabla: {driver_config['table']}")
+print(f"[DRIVER] Filtrar por site: {'SÍ' if driver_config['filter_by_site'] or (driver_config['type'] == 'shipping_drivers' and args.filter_driver_by_site) else 'NO (GLOBAL)'}")
+print(f"[DRIVER] Descripción: {driver_desc}")
+print()
+
+if args.from_cache:
+    # ── FROM-CACHE: leer métricas desde CSV cacheado ──────────────────────────
+    _dim_cache = (args.muestreo_dimension or aperturas_list[0]).lower()
+    _cuadro_cache = Path(args.output_dir) / f"cuadro_{_dim_cache}_{args.site.lower()}_{p1_start_dt.strftime('%Y%m')}.csv"
+    if not _cuadro_cache.exists():
+        print(f"[ERROR] Caché no encontrado: {_cuadro_cache}")
+        sys.exit(1)
+    _df_cache = pd.read_csv(_cuadro_cache)
+    _total = _df_cache[_df_cache['DIMENSION_VAL'] == 'TOTAL'].iloc[0]
+    inc_p1_total = int(_total['INC_P1'])
+    inc_p2_total = int(_total['INC_P2'])
+    drv_p1_total = int(_total['DRV_P1'])
+    drv_p2_total = int(_total['DRV_P2'])
+    var_inc_total = inc_p2_total - inc_p1_total
+    cr_p1 = (inc_p1_total / drv_p1_total) * 100
+    cr_p2 = (inc_p2_total / drv_p2_total) * 100
+    var_cr = cr_p2 - cr_p1
+    var_cr_pct = (var_cr / cr_p1) * 100 if cr_p1 > 0 else 0
+    var_inc_pct = (var_inc_total / inc_p1_total) * 100 if inc_p1_total > 0 else 0
+    print(f"[FROM-CACHE] Incoming P1: {inc_p1_total:,} | P2: {inc_p2_total:,} | Var: {var_inc_total:+,}")
+    print(f"[FROM-CACHE] Drivers  P1: {drv_p1_total:,} | P2: {drv_p2_total:,}")
+    print(f"[FROM-CACHE] CR P1: {cr_p1:.3f} pp | P2: {cr_p2:.3f} pp | Var: {var_cr:+.3f} pp")
+    print()
+    queries_ejecutadas.append({'nombre': 'Métricas (caché)', 'descripcion': f'Cargado desde {_cuadro_cache.name}', 'tabla': 'CSV local', 'output': f'P1: {inc_p1_total:,} | P2: {inc_p2_total:,}'})
+
+else:
+    # ── BQ normal ─────────────────────────────────────────────────────────────
+    print(f"[QUERY] Calculando incoming total...")
+
+    query_incoming_total = f"""
 WITH BASE_CONTACTS AS (
     SELECT
         DATE_TRUNC(C.CONTACT_DATE_ID, MONTH) AS PERIODO,
@@ -2043,57 +2228,35 @@ BASE_FILTERED AS (
     SELECT * FROM BASE_CONTACTS
     WHERE AGRUP_COMMERCE = '{args.commerce_group}'
 )
-SELECT 
+SELECT
     SUM(CASE WHEN PERIODO BETWEEN '{args.p1_start}' AND '{args.p1_end}' THEN CANT_CASES ELSE 0 END) as INC_P1,
     SUM(CASE WHEN PERIODO BETWEEN '{args.p2_start}' AND '{args.p2_end}' THEN CANT_CASES ELSE 0 END) as INC_P2
 FROM BASE_FILTERED
 """
 
-df_inc_total = client.query(query_incoming_total).to_dataframe()
-inc_p1_total = int(df_inc_total['INC_P1'].iloc[0])
-inc_p2_total = int(df_inc_total['INC_P2'].iloc[0])
+    df_inc_total = client.query(query_incoming_total).to_dataframe()
+    inc_p1_total = int(df_inc_total['INC_P1'].iloc[0])
+    inc_p2_total = int(df_inc_total['INC_P2'].iloc[0])
 
-# Registrar query ejecutada
-queries_ejecutadas.append({
-    'nombre': 'Incoming Total',
-    'descripcion': f'Casos totales para {args.commerce_group} en ambos períodos',
-    'tabla': 'BT_CX_CONTACTS',
-    'output': f'P1: {inc_p1_total:,} casos | P2: {inc_p2_total:,} casos'
-})
-var_inc_total = inc_p2_total - inc_p1_total
+    queries_ejecutadas.append({
+        'nombre': 'Incoming Total',
+        'descripcion': f'Casos totales para {args.commerce_group} en ambos períodos',
+        'tabla': 'BT_CX_CONTACTS',
+        'output': f'P1: {inc_p1_total:,} casos | P2: {inc_p2_total:,} casos'
+    })
+    var_inc_total = inc_p2_total - inc_p1_total
 
-print(f"[OK] Incoming P1: {inc_p1_total:,}")
-print(f"[OK] Incoming P2: {inc_p2_total:,}")
-print(f"[OK] Variación: {var_inc_total:+,} casos")
-print()
+    print(f"[OK] Incoming P1: {inc_p1_total:,}")
+    print(f"[OK] Incoming P2: {inc_p2_total:,}")
+    print(f"[OK] Variación: {var_inc_total:+,} casos")
+    print()
 
-# ========================================
-# CALCULAR DRIVERS DINÁMICAMENTE SEGÚN COMMERCE GROUP
-# ========================================
-# Obtener configuración de driver para este commerce group
-driver_config = get_driver_config(args.commerce_group)
-driver_desc = get_driver_description(args.commerce_group, args.site)
+    print(f"[QUERY] Calculando drivers totales...")
 
-# Agregar indicador de override si corresponde
-if driver_config['type'] == 'shipping_drivers' and args.filter_driver_by_site:
-    driver_desc = f"{driver_desc} ({args.site} únicamente) ⚠️ MODO OVERRIDE"
-
-print(f"[DRIVER] Commerce Group: {args.commerce_group}")
-print(f"[DRIVER] Tipo: {driver_config['type']}")
-print(f"[DRIVER] Tabla: {driver_config['table']}")
-print(f"[DRIVER] Filtrar por site: {'SÍ' if driver_config['filter_by_site'] or (driver_config['type'] == 'shipping_drivers' and args.filter_driver_by_site) else 'NO (GLOBAL)'}")
-print(f"[DRIVER] Descripción: {driver_desc}")
-print()
-
-print(f"[QUERY] Calculando drivers totales...")
-
-# Generar query según tipo de driver
-if driver_config['type'] == 'shipping_drivers':
-    # Drivers de Shipping: usar BT_CX_DRIVERS_CR
-    # Por defecto es GLOBAL, pero puede filtrarse por site con --filter-driver-by-site
-    site_filter = f"AND {resolve_site_sql(args.site, 'drv.SIT_SITE_ID')}" if args.filter_driver_by_site else ""
-    
-    query_drivers_total = f"""
+    # Generar query según tipo de driver
+    if driver_config['type'] == 'shipping_drivers':
+        site_filter = f"AND {resolve_site_sql(args.site, 'drv.SIT_SITE_ID')}" if args.filter_driver_by_site else ""
+        query_drivers_total = f"""
     SELECT
         SUM(CASE WHEN drv.MONTH_ID BETWEEN '{args.p1_start}' AND '{args.p1_end}' THEN {driver_config['count_expression'].replace('SUM(drv.', 'drv.').replace(')', '')} ELSE 0 END) as DRV_P1,
         SUM(CASE WHEN drv.MONTH_ID BETWEEN '{args.p2_start}' AND '{args.p2_end}' THEN {driver_config['count_expression'].replace('SUM(drv.', 'drv.').replace(')', '')} ELSE 0 END) as DRV_P2
@@ -2101,10 +2264,8 @@ if driver_config['type'] == 'shipping_drivers':
     WHERE drv.MONTH_ID BETWEEN '{args.p1_start}' AND '{args.p2_end}'
     {site_filter}
     """
-    
-elif driver_config['filter_by_site']:
-    # Marketplace: Órdenes filtradas por site
-    query_drivers_total = f"""
+    elif driver_config['filter_by_site']:
+        query_drivers_total = f"""
     SELECT
         SUM(CASE WHEN ORD.ORD_CLOSED_DT BETWEEN '{args.p1_start}' AND '{args.p1_end}' THEN 1 ELSE 0 END) as DRV_P1,
         SUM(CASE WHEN ORD.ORD_CLOSED_DT BETWEEN '{args.p2_start}' AND '{args.p2_end}' THEN 1 ELSE 0 END) as DRV_P2
@@ -2116,10 +2277,8 @@ elif driver_config['filter_by_site']:
         AND {resolve_site_sql(args.site, 'ORD.SIT_SITE_ID')}
         AND (UPPER(ORD.DOM_DOMAIN_ID) <> 'TIPS')
     """
-    
-else:
-    # Post-Compra, Pagos, Cuenta: Órdenes globales (sin filtro site)
-    query_drivers_total = f"""
+    else:
+        query_drivers_total = f"""
     SELECT
         SUM(CASE WHEN ORD.ORD_CLOSED_DT BETWEEN '{args.p1_start}' AND '{args.p1_end}' THEN 1 ELSE 0 END) as DRV_P1,
         SUM(CASE WHEN ORD.ORD_CLOSED_DT BETWEEN '{args.p2_start}' AND '{args.p2_end}' THEN 1 ELSE 0 END) as DRV_P2
@@ -2132,33 +2291,32 @@ else:
         AND (UPPER(ORD.DOM_DOMAIN_ID) <> 'TIPS')
     """
 
-df_drv_total = client.query(query_drivers_total).to_dataframe()
-drv_p1_total = int(df_drv_total['DRV_P1'].iloc[0])
-drv_p2_total = int(df_drv_total['DRV_P2'].iloc[0])
+    df_drv_total = client.query(query_drivers_total).to_dataframe()
+    drv_p1_total = int(df_drv_total['DRV_P1'].iloc[0])
+    drv_p2_total = int(df_drv_total['DRV_P2'].iloc[0])
 
-# Registrar query ejecutada
-queries_ejecutadas.append({
-    'nombre': f'Drivers ({driver_config["type"]})',
-    'descripcion': driver_desc,
-    'tabla': driver_config['table'],
-    'output': f'P1: {drv_p1_total:,} | P2: {drv_p2_total:,}'
-})
+    queries_ejecutadas.append({
+        'nombre': f'Drivers ({driver_config["type"]})',
+        'descripcion': driver_desc,
+        'tabla': driver_config['table'],
+        'output': f'P1: {drv_p1_total:,} | P2: {drv_p2_total:,}'
+    })
 
-print(f"[OK] Drivers P1: {drv_p1_total:,}")
-print(f"[OK] Drivers P2: {drv_p2_total:,}")
-print()
+    print(f"[OK] Drivers P1: {drv_p1_total:,}")
+    print(f"[OK] Drivers P2: {drv_p2_total:,}")
+    print()
 
-# Calcular CR
-cr_p1 = (inc_p1_total / drv_p1_total) * 100
-cr_p2 = (inc_p2_total / drv_p2_total) * 100
-var_cr = cr_p2 - cr_p1
-var_cr_pct = (var_cr / cr_p1) * 100 if cr_p1 > 0 else 0
-var_inc_pct = (var_inc_total / inc_p1_total) * 100 if inc_p1_total > 0 else 0
+    # Calcular CR
+    cr_p1 = (inc_p1_total / drv_p1_total) * 100
+    cr_p2 = (inc_p2_total / drv_p2_total) * 100
+    var_cr = cr_p2 - cr_p1
+    var_cr_pct = (var_cr / cr_p1) * 100 if cr_p1 > 0 else 0
+    var_inc_pct = (var_inc_total / inc_p1_total) * 100 if inc_p1_total > 0 else 0
 
-print(f"[RESULTADO] CR P1: {cr_p1:.4f} pp")
-print(f"[RESULTADO] CR P2: {cr_p2:.4f} pp")
-print(f"[RESULTADO] Variación CR: {var_cr:+.4f} pp ({var_cr_pct:+.1f}%)")
-print()
+    print(f"[RESULTADO] CR P1: {cr_p1:.3f} pp")
+    print(f"[RESULTADO] CR P2: {cr_p2:.3f} pp")
+    print(f"[RESULTADO] Variación CR: {var_cr:+.3f} pp ({var_cr_pct:+.1f}%)")
+    print()
 
 # Guardar métricas consolidadas
 metrics_consolidadas = {
@@ -2182,9 +2340,25 @@ print("="*80)
 print("PASO 2: GRÁFICO SEMANAL")
 print("="*80 + "\n")
 
-print(f"[QUERY] Calculando CR semanal (últimas 25 semanas)...")
+if args.from_cache:
+    # ── FROM-CACHE: leer weekly desde CSV ─────────────────────────────────────
+    _weekly_csv = Path(args.output_dir) / f"weekly_{args.site.lower()}_{args.commerce_group.lower()}_{p1_start_dt.strftime('%Y%m')}.csv"
+    if not _weekly_csv.exists():
+        print(f"[ERROR] Caché semanal no encontrado: {_weekly_csv}")
+        sys.exit(1)
+    df_weekly = pd.read_csv(_weekly_csv)
+    df_weekly['SEMANA'] = pd.to_datetime(df_weekly['SEMANA'])
+    if 'SEMANA_LABEL' not in df_weekly.columns:
+        df_weekly['SEMANA_LABEL'] = df_weekly['SEMANA'].dt.strftime('%d-%b')
+    print(f"[FROM-CACHE] {len(df_weekly)} semanas cargadas desde {_weekly_csv.name}")
+    print()
+    queries_ejecutadas.append({'nombre': 'Evolución Semanal (caché)', 'descripcion': f'Cargado desde {_weekly_csv.name}', 'tabla': 'CSV local', 'output': f'{len(df_weekly)} semanas'})
 
-query_weekly = f"""
+else:
+    # ── BQ normal ─────────────────────────────────────────────────────────────
+    print(f"[QUERY] Calculando CR semanal (últimas 25 semanas)...")
+
+    query_weekly = f"""
 WITH BASE_CONTACTS AS (
     SELECT
         DATE_TRUNC(C.CONTACT_DATE_ID, WEEK(MONDAY)) as SEMANA,
@@ -2208,7 +2382,7 @@ WEEKLY_INCOMING AS (
     GROUP BY SEMANA
 ),
 WEEKLY_DRIVERS AS (
-    SELECT 
+    SELECT
         DATE_TRUNC(ORD.ORD_CLOSED_DT, WEEK(MONDAY)) as SEMANA,
         COUNT(DISTINCT ORD.ORD_ORDER_ID) as ORDERS
     FROM `meli-bi-data.WHOWNER.BT_ORD_ORDERS` ORD
@@ -2219,7 +2393,7 @@ WEEKLY_DRIVERS AS (
         AND (UPPER(ORD.DOM_DOMAIN_ID) <> 'TIPS')
     GROUP BY SEMANA
 )
-SELECT 
+SELECT
     I.SEMANA,
     I.CASOS as INCOMING,
     D.ORDERS as DRIVER,
@@ -2229,20 +2403,19 @@ LEFT JOIN WEEKLY_DRIVERS D ON I.SEMANA = D.SEMANA
 ORDER BY I.SEMANA
 """
 
-df_weekly = client.query(query_weekly).to_dataframe()
-df_weekly['SEMANA'] = pd.to_datetime(df_weekly['SEMANA'])
-df_weekly['SEMANA_LABEL'] = df_weekly['SEMANA'].dt.strftime('%d-%b')
+    df_weekly = client.query(query_weekly).to_dataframe()
+    df_weekly['SEMANA'] = pd.to_datetime(df_weekly['SEMANA'])
+    df_weekly['SEMANA_LABEL'] = df_weekly['SEMANA'].dt.strftime('%d-%b')
 
-# Registrar query ejecutada
-queries_ejecutadas.append({
-    'nombre': 'Evolución Semanal',
-    'descripcion': f'CR semanal para {args.commerce_group} desde 14+ semanas antes',
-    'tabla': 'BT_CX_CONTACTS + BT_ORD_ORDERS',
-    'output': f'{len(df_weekly)} semanas analizadas'
-})
+    queries_ejecutadas.append({
+        'nombre': 'Evolución Semanal',
+        'descripcion': f'CR semanal para {args.commerce_group} desde 14+ semanas antes',
+        'tabla': 'BT_CX_CONTACTS + BT_ORD_ORDERS',
+        'output': f'{len(df_weekly)} semanas analizadas'
+    })
 
-print(f"[OK] {len(df_weekly)} semanas calculadas")
-print()
+    print(f"[OK] {len(df_weekly)} semanas calculadas")
+    print()
 
 # ========================================
 # PASO 3: CUADROS CUANTITATIVOS POR DIMENSIÓN
@@ -2258,14 +2431,23 @@ cuadros_cuantitativos = {}
 # Rastrear queries ejecutadas (para footer técnico)
 queries_ejecutadas = []
 
-# ========================================
-# MODO PROCESO ÚNICO: Generar cuadro sintético
-# ========================================
-# Si se especifica --process-name con --aperturas NONE, generar cuadro de 1 fila
-# para que el análisis de conversaciones pueda funcionar correctamente
+# Modo proceso único (necesario también en from-cache para PASO 4)
 modo_proceso_unico = (args.process_name is not None and 'NONE' in aperturas_list)
 
-if modo_proceso_unico:
+if args.from_cache:
+    # ── FROM-CACHE: cargar cuadros desde CSVs ─────────────────────────────────
+    print("[FROM-CACHE] Cargando cuadros cuantitativos desde CSVs...")
+    for _ap in aperturas_list:
+        _cp = Path(args.output_dir) / f"cuadro_{_ap.lower()}_{args.site.lower()}_{p1_start_dt.strftime('%Y%m')}.csv"
+        if _cp.exists():
+            cuadros_cuantitativos[_ap] = pd.read_csv(_cp)
+            queries_ejecutadas.append({'nombre': f'Cuadro {_ap} (caché)', 'descripcion': f'Cargado desde {_cp.name}', 'tabla': 'CSV local', 'output': f'{len(cuadros_cuantitativos[_ap])} filas'})
+            print(f"[FROM-CACHE]   {_ap}: {len(cuadros_cuantitativos[_ap])} filas")
+        else:
+            print(f"[WARNING] Cuadro {_ap} no encontrado: {_cp.name}")
+    print()
+
+if not args.from_cache and modo_proceso_unico:
     print("[MODO] Proceso único detectado: análisis de 1 proceso sin drill-down")
     print(f"[INFO] Proceso: {args.process_name}")
     print(f"[INFO] Generando cuadro sintético con 1 elemento (100% contribución)")
@@ -2329,6 +2511,9 @@ if modo_proceso_unico:
     })
 
 for apertura in aperturas_list:
+    # En modo caché, los cuadros ya están cargados → saltar este bucle BQ
+    if args.from_cache:
+        break
     # Si estamos en modo proceso único, saltar bucle (ya generamos cuadro sintético)
     if modo_proceso_unico:
         print(f"[SKIP] Saltando bucle de aperturas (modo proceso único activo)")
@@ -2480,7 +2665,73 @@ print()
 
 conversaciones_por_proceso = {}
 
-if not args.skip_conversations:
+if args.from_cache:
+    # ── FROM-CACHE: cargar CSVs de conversaciones + JSONs existentes ──────────
+    print("="*80)
+    print("PASO 4: ANÁLISIS DE CONVERSACIONES (desde caché)")
+    print("="*80 + "\n")
+
+    _dim_fc = (args.muestreo_dimension or aperturas_list[0]).upper()
+    if modo_proceso_unico and 'PROCESO' in cuadros_cuantitativos:
+        _dim_fc = 'PROCESO'
+
+    if _dim_fc in cuadros_cuantitativos:
+        _df_muestreo_fc = cuadros_cuantitativos[_dim_fc]
+        _elementos_fc = _df_muestreo_fc[
+            (~_df_muestreo_fc['DIMENSION_VAL'].isin(['TOTAL'])) &
+            (~_df_muestreo_fc['DIMENSION_VAL'].str.contains('Otros', na=False))
+        ]['DIMENSION_VAL'].tolist()
+
+        # Configurar (carga JSONs si existen → USE_CLAUDE_ANALYSIS = True)
+        configurar_analisis_claude(
+            args.site, args.commerce_group, _dim_fc,
+            args.p1_start, args.p2_start,
+            _elementos_fc, usar_analisis_separado=True
+        )
+
+        for _el in _elementos_fc:
+            _el_safe = _el.replace('/', '_').replace(' ', '_')
+            _csv_p1 = Path(args.output_dir) / f"conversaciones_{_el_safe}_{args.site.lower()}_p1_{p1_start_dt.strftime('%Y%m')}.csv"
+            _csv_p2 = Path(args.output_dir) / f"conversaciones_{_el_safe}_{args.site.lower()}_p2_{p2_start_dt.strftime('%Y%m')}.csv"
+
+            if _csv_p1.exists() and _csv_p2.exists():
+                _df_p1_fc = pd.read_csv(_csv_p1)
+                _df_p2_fc = pd.read_csv(_csv_p2)
+                _df_all_fc = pd.concat([_df_p1_fc, _df_p2_fc], ignore_index=True)
+                conversaciones_por_proceso[_el] = {
+                    'status': 'con_data',
+                    'casos_p1': len(_df_p1_fc),
+                    'casos_p2': len(_df_p2_fc),
+                    'df_p1': _df_p1_fc,
+                    'df_p2': _df_p2_fc,
+                    'df_all': _df_all_fc,
+                }
+                print(f"[FROM-CACHE] '{_el}': {len(_df_p1_fc)} P1 + {len(_df_p2_fc)} P2 conversaciones")
+            else:
+                conversaciones_por_proceso[_el] = {'status': 'sin_data', 'casos_p1': 0, 'casos_p2': 0}
+                print(f"[WARNING] CSVs de conversaciones no encontrados para '{_el}'")
+
+        print()
+        print(f"[ANÁLISIS] Cargando análisis desde JSONs para {len(conversaciones_por_proceso)} procesos...")
+        for _el, _data in conversaciones_por_proceso.items():
+            if _data['status'] != 'con_data':
+                continue
+            _analisis = analyze_conversations_with_llm(
+                df_conversations=_data['df_all'],
+                proceso=_el,
+                commerce_group=args.commerce_group
+            )
+            conversaciones_por_proceso[_el]['analisis_llm'] = _analisis
+            if USE_CLAUDE_ANALYSIS and _el in ANALISIS_PREEXISTENTES:
+                _cob = _analisis['cobertura']['covered_pct']
+                _nc = len([c for c in _analisis['causas'] if '⚠️' not in c['descripcion']])
+                print(f"  [OK] '{_el}': {_nc} causas raíz (cobertura: {_cob:.0f}%)")
+        print()
+    else:
+        print(f"[WARNING] Dimensión '{_dim_fc}' no encontrada en caché. Sin análisis de conversaciones.")
+        print()
+
+elif not args.skip_conversations:
     print("="*80)
     print("PASO 4: ANÁLISIS DE CONVERSACIONES")
     print("="*80 + "\n")
@@ -3007,7 +3258,7 @@ var_inc_class = 'negative' if var_inc_total > 0 else 'positive'
 # BULLET 1: Variación de CR + Métricas Consolidadas
 direccion_cr = "empeoró" if var_cr > 0 else "mejoró"
 signo_cr = "+" if var_cr > 0 else ""
-bullet_1 = f"CR {direccion_cr} {signo_cr}{var_cr:.4f} pp ({signo_cr}{var_cr_pct:.1f}%) | {p1_start_dt.strftime('%b')}: {cr_p1:.4f} pp → {p2_start_dt.strftime('%b')}: {cr_p2:.4f} pp | {signo_cr}{var_inc_total:,} casos de {args.commerce_group} en {args.site}"
+bullet_1 = f"CR {direccion_cr} {signo_cr}{var_cr:.3f} pp ({signo_cr}{var_cr_pct:.1f}%) | {p1_start_dt.strftime('%b')}: {cr_p1:.3f} pp → {p2_start_dt.strftime('%b')}: {cr_p2:.3f} pp | {signo_cr}{var_inc_total:,} casos de {args.commerce_group} en {args.site}"
 
 # BULLET 2: Principal elemento + contribución + causa raíz (si existe análisis de conversaciones)
 # Usar dimensión de muestreo cuando hay análisis, para que los elementos coincidan con conversaciones_por_proceso
@@ -3089,7 +3340,9 @@ if len(cuadros_cuantitativos) > 0:
     elif len(eventos_comerciales) > 0:
         # Si no hay segundo elemento, usar eventos comerciales
         evento_top = list(eventos_comerciales.values())[0]
-        bullet_3 = f"Eventos relevantes: {evento_top['nombre']} explica {evento_top['porcentaje']:.1f}% de los casos ({evento_top['casos']:,} casos correlacionados)"
+        porcentaje_evento = evento_top.get('porcentaje_p2', evento_top.get('porcentaje_p1', 0))
+        casos_evento = evento_top.get('casos_total', evento_top.get('casos', 0))
+        bullet_3 = f"Eventos relevantes: {evento_top['nombre']} explica {porcentaje_evento:.1f}% de los casos ({casos_evento:,} casos correlacionados)"
     elif len(df_weekly) > 0:
         # Si no hay eventos, usar análisis de picos semanales
         promedio_incoming = df_weekly['INCOMING'].mean()
@@ -3222,9 +3475,9 @@ if eventos_comerciales:
 # 5. Si no hay suficientes explicaciones, agregar una genérica basada en métricas
 if len(hallazgo_explicaciones) < 2:
     if cr_mejoro:
-        hallazgo_explicaciones.append(f"Mejora operativa reflejada en reducción del CR ({var_cr:.4f} pp)")
+        hallazgo_explicaciones.append(f"Mejora operativa reflejada en reducción del CR ({var_cr:.3f} pp)")
     else:
-        hallazgo_explicaciones.append(f"Incremento de contactos que requiere atención ({var_cr:+.4f} pp)")
+        hallazgo_explicaciones.append(f"Incremento de contactos que requiere atención ({var_cr:+.3f} pp)")
 
 # Generar texto introductorio del hallazgo
 if cr_mejoro:
@@ -3252,7 +3505,7 @@ html_content = f"""<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CR Report v6.3 - {args.commerce_group} {args.site}</title>
+    <title>Reporte CR v6.3 - {args.commerce_group} {args.site}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -3593,14 +3846,63 @@ html_content = f"""<!DOCTYPE html>
         .feriados-periodo .badge-pre {{ background: #FFF3CD; color: #856404; }}
         .feriados-periodo .badge-p1 {{ background: #D4EDDA; color: var(--meli-green); }}
         .feriados-periodo .badge-p2 {{ background: #CCE5FF; color: var(--meli-blue); }}
-        .feriados-periodo .summary {{ 
-            background: var(--meli-bg); 
-            padding: 12px 16px; 
-            border-radius: var(--radius); 
-            margin-top: 16px; 
+        .feriados-periodo .summary {{
+            background: var(--meli-bg);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-top: 16px;
             font-size: 13px;
         }}
-        
+
+        /* ========== CONTINGENCIAS OPERACIONALES ========== */
+        .contingencias-operacionales {{
+            background: var(--meli-white);
+            padding: 28px 32px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }}
+        .contingencias-operacionales h2 {{
+            color: var(--meli-dark);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #F23D4F;
+        }}
+        .contingencias-operacionales .info-box {{
+            background: var(--meli-bg);
+            border-left: 3px solid #F23D4F;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-size: 12px;
+        }}
+        .contingencias-operacionales .badge {{
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+        }}
+        .contingencias-operacionales .badge-p1 {{ background: #D4EDDA; color: var(--meli-green); }}
+        .contingencias-operacionales .badge-p2 {{ background: #CCE5FF; color: var(--meli-blue); }}
+        .contingencias-operacionales .badge-ambos {{ background: #FFF3CD; color: #856404; }}
+        .contingencias-operacionales .badge-open {{ background: #F8D7DA; color: var(--meli-red); }}
+        .contingencias-operacionales .badge-closed {{ background: #D4EDDA; color: var(--meli-green); }}
+        .contingencias-operacionales .env-tag {{
+            font-size: 10px;
+            color: var(--meli-gray);
+            font-style: italic;
+        }}
+        .contingencias-operacionales .summary {{
+            background: var(--meli-bg);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-top: 16px;
+            font-size: 13px;
+        }}
+
         /* ========== WARNING BANNER ========== */
         .warning-banner {{ 
             background: var(--meli-yellow); 
@@ -3811,7 +4113,7 @@ html_content = f"""<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Contact Rate Analysis - {args.commerce_group}{f' - {args.process_name}' if args.process_name else ''} {args.site}</h1>
+            <h1>📊 Análisis de Contact Rate - {args.commerce_group}{f' - {args.process_name}' if args.process_name else ''} {args.site}</h1>
             <div class="subtitle">
                 Período: {p1_label} vs {p2_label} | Commerce Group: {args.commerce_group}{f' | Proceso: {args.process_name}' if args.process_name else ''} | Site: {args.site}
             </div>
@@ -3842,17 +4144,17 @@ html_content = f"""<!DOCTYPE html>
         <div class="cards-grid">
             <div class="card">
                 <div class="card-label">CR {p1_label}</div>
-                <div class="card-value">{cr_p1:.4f}</div>
+                <div class="card-value">{cr_p1:.3f}</div>
                 <div class="card-change">pp</div>
             </div>
             <div class="card {var_cr_class}">
                 <div class="card-label">CR {p2_label}</div>
-                <div class="card-value">{cr_p2:.4f}</div>
-                <div class="card-change {var_cr_class}">{var_cr:+.4f} pp</div>
+                <div class="card-value">{cr_p2:.3f}</div>
+                <div class="card-change {var_cr_class}">{var_cr:+.3f} pp</div>
             </div>
             <div class="card {var_cr_class}">
                 <div class="card-label">Variación CR</div>
-                <div class="card-value">{var_cr:+.4f}</div>
+                <div class="card-value">{var_cr:+.3f}</div>
                 <div class="card-change {var_cr_class}">pp ({var_cr_pct:+.1f}%)</div>
             </div>
             <div class="card {var_inc_class}">
@@ -3896,7 +4198,10 @@ html_content = f"""<!DOCTYPE html>
         
         <!-- FERIADOS DEL PERÍODO -->
         {feriados_html}
-        
+
+        <!-- CONTINGENCIAS OPERACIONALES -->
+        {contingencias_html}
+
         <!-- CUADROS CUANTITATIVOS -->
         <div class="section">
             <h2>📊 Cuadros Cuantitativos por Dimensión</h2>
@@ -3950,9 +4255,9 @@ for dimension, df in cuadros_cuantitativos.items():
                         <td><strong>{row['DIMENSION_VAL']}</strong></td>
                         <td class="number">{int(row['INC_P1']):,}</td>
                         <td class="number">{int(row['INC_P2']):,}</td>
-                        <td class="number">{row['CR_P1']:.4f}</td>
-                        <td class="number">{row['CR_P2']:.4f}</td>
-                        <td class="number {var_class}">{row['VAR_CR']:+.4f}</td>
+                        <td class="number">{row['CR_P1']:.3f}</td>
+                        <td class="number">{row['CR_P2']:.3f}</td>
+                        <td class="number {var_class}">{row['VAR_CR']:+.3f}</td>
                         <td class="number {var_class}">{row['CONTRIB_ABS']:.1f}%</td>
                     </tr>
 """
@@ -5317,7 +5622,7 @@ html_content += """
                 labels: """ + str(df_weekly['SEMANA_LABEL'].tolist()) + """,
                 datasets: [{
                     label: 'CR (pp)',
-                    data: """ + str(df_weekly['CR'].round(4).tolist()) + """,
+                    data: """ + str(df_weekly['CR'].round(3).tolist()) + """,
                     borderColor: '""" + color_config['primary'] + """',
                     backgroundColor: 'rgba(0, 166, 80, 0.1)',
                     tension: 0.4,
@@ -5376,9 +5681,9 @@ print("  📊 CARDS EJECUTIVAS")
 print("  " + "─"*76)
 print(f"  │ Incoming P1:  {inc_p1_total:>12,}   │  Incoming P2:  {inc_p2_total:>12,}   │")
 print(f"  │ Driver P1:    {drv_p1_total:>12,}   │  Driver P2:    {drv_p2_total:>12,}   │")
-print(f"  │ CR P1:        {cr_p1:>11.4f} pp  │  CR P2:        {cr_p2:>11.4f} pp  │")
+print(f"  │ CR P1:        {cr_p1:>11.3f} pp  │  CR P2:        {cr_p2:>11.3f} pp  │")
 print(f"  │ Var Incoming:    {var_inc_total:>+10,} ({var_inc_pct:+.1f}%)")
-print(f"  │ Var CR:          {var_cr:>+10.4f} pp ({var_cr_pct:+.1f}%)")
+print(f"  │ Var CR:          {var_cr:>+10.3f} pp ({var_cr_pct:+.1f}%)")
 print("  " + "─"*76)
 print()
 
@@ -5416,7 +5721,7 @@ for dimension, df in cuadros_cuantitativos.items():
         r_cr_p2 = row['CR_P2']
         r_var_cr = row['VAR_CR']
         contrib_str = f"{r_contrib:.1f}%" if pd.notna(r_contrib) and str(r_contrib) != '' else ""
-        print(f"  {dim_val:<25} {r_inc_p1:>9,} {r_inc_p2:>9,} {r_var_inc:>+8,} {contrib_str:>9} {r_cr_p1:>9.4f} {r_cr_p2:>9.4f} {r_var_cr:>+9.4f}")
+        print(f"  {dim_val:<25} {r_inc_p1:>9,} {r_inc_p2:>9,} {r_var_inc:>+8,} {contrib_str:>9} {r_cr_p1:>9.3f} {r_cr_p2:>9.3f} {r_var_cr:>+9.3f}")
     print()
 
 # --- 6. ANÁLISIS COMPARATIVO DE CAUSAS RAÍZ ---
